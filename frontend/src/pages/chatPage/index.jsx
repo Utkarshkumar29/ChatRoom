@@ -60,7 +60,8 @@ const ChatRoom = () => {
                 setIsLoading(true);
                 try {
                     const response = await axios.get(`/api/message/${chatId}`);
-                    setChatroomMessages(response.data);
+                    const messages = Array.isArray(response.data) ? response.data : []; // Ensure it's an array
+                    setChatroomMessages(messages);
                 } catch (error) {
                     console.error('Error fetching chatroom messages:', error);
                 } finally {
@@ -155,7 +156,7 @@ const ChatRoom = () => {
                         {isLoading ? (
                             <p>Loading....</p>
                         ) : (
-                            chatroomMessages.map((message, index) => (
+                            chatroomMessages?.map((message, index) => (
                                 <p key={index}>{message?.content}</p>
                             ))
                         )}

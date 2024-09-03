@@ -78,6 +78,23 @@ const allMessage = asyncHandler(async (req, res) => {
   }
 });
 
+const editMessage=asyncHandler(async(req,res)=>{
+  const {messageId,content}=req.body
+  try {
+      const message=await Message.findOneAndUpdate(
+        {_id:messageId},
+        {$set:{
+          content:content
+        }}
+      )
+      if(message){
+        res.status(200).json({message:"Message updated successfully"})
+      }
+  } catch (error) {
+      console.log(error)
+  }
+})
+
 const deleteMessage = asyncHandler(async (req, res) => {
   const { messageId, deleteMsg, deleteForEveryone } = req.body;
   try {
@@ -178,4 +195,4 @@ const getAllPinnedMessage = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { sendMessage, allMessage, deleteMessage, starMessage, pinMessage, getAllPinnedMessage, getStarredMessage };
+module.exports = { sendMessage, allMessage, deleteMessage, starMessage, pinMessage, getAllPinnedMessage, getStarredMessage, editMessage };

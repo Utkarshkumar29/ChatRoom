@@ -7,7 +7,8 @@ const {
   starMessage,
   pinMessage,
   getAllPinnedMessage,
-  getStarredMessage
+  getStarredMessage,
+  editMessage
 } = require('../controllers/messageController');
 
 const router = express.Router();
@@ -15,6 +16,7 @@ const router = express.Router();
 // Message routes
 router.route('/').post(protect, sendMessage);
 router.route('/').put(protect, deleteMessage);
+router.route('/edit').put(protect, editMessage);
 
 // Starred messages routes
 router.route('/star').put(protect, starMessage);
