@@ -16,6 +16,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     replyTo: replyTo,
     isDeleted: false,
     isDeletedForEveryOne: false,
+    
     isPinned: false,
     isStarred: [],
   };
@@ -195,4 +196,19 @@ const getAllPinnedMessage = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { sendMessage, allMessage, deleteMessage, starMessage, pinMessage, getAllPinnedMessage, getStarredMessage, editMessage };
+const markAsSeen=asyncHandler(async(req,res)=>{
+  const {messageId,userId}=req.body
+  try {
+    const message = await Message.findByIdAndUpdate(
+        messageId,
+      { $addToSet: { isReadByAll: userId } },
+      { new: true }
+    );
+      res.status(200).send({message:message})
+      console.log(message)
+  } catch (error) {
+      console.log(error)
+  }
+})
+
+module.exports = { sendMessage, allMessage, deleteMessage, starMessage, pinMessage, getAllPinnedMessage, getStarredMessage, editMessage, markAsSeen };

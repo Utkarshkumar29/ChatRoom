@@ -59,6 +59,7 @@ const Discussions = () => {
   const [selectMessage, setSelectMessage] = useState([]);
   const [allowSelect, setAllowSelect] = useState(false);
   const [forward, setForward] = useState(false);
+  
 
   const ENDPOINT = "http://localhost:5000";
   const socket = useRef(null);
@@ -558,7 +559,59 @@ const Discussions = () => {
     return fileName;
   };
 
-  console.log(user,'decode')
+  const messageRef=useRef([])
+  const seenMessages = useRef(new Set());
+
+  useEffect(()=>{
+    const observer= new IntersectionObserver((enteries)=>{
+      enteries.forEach((entry)=>{
+        if (entry.isIntersecting) {
+          const messageId = entry.target.getAttribute('data-id');
+          console.log(messageId,'decode1')
+          
+          // Avoid calling markAsSeen if the message is already seen
+          if (!seenMessages.current.has(messageId)) {
+            seenMessages.current.add(messageId); // Mark as seen
+            markAsSeen(messageId, JSON.parse(localStorage.getItem('user'))?._id);
+          }
+        }
+      })
+    })
+
+    messageRef.current.forEach((messageRef)=>{
+      if(messageRef){
+        observer.observe(messageRef)
+      }
+    })
+
+    return ()=>{
+      messageRef.current.forEach((messageRef)=>{
+        if(messageRef){
+          observer.unobserve(messageRef)
+        }
+      })
+    }
+  },[chatMessage])
+
+  const markAsSeen=async(messageId,userId)=>{
+    try {
+        const response=await axios.put(`/api/message/seen`,{
+          messageId:messageId,
+          userId:userId
+        })
+        setChatMessage((messages) =>
+          messages.map((message) =>
+            message?._id === response?.data?.message?._id
+              ? { ...message, isReadByAll: [...message.isReadByAll, userId] }
+              : message
+          )
+        );
+    } catch (error) {
+        console.log(error)
+    }
+  }
+
+  console.log(groupChatRoom,'decode')
   return (
     <>
       <div className="w-full flex h-screen bg-red-800">
@@ -813,7 +866,7 @@ const Discussions = () => {
                   console.log(message.link, "File available at:");
                   return (
                     <>
-                      <div key={index} className="mb-2">
+                      <div key={index} ref={(el) => (messageRef.current[index] = el)}  data-id={message._id} className="mb-2">
                         {allowSelect && (
                           <input
                             type="checkbox"
@@ -825,7 +878,8 @@ const Discussions = () => {
                           />
                         )}
                         <p>
-                          <strong>Sender:</strong> {message.sender.username}
+                          <strong>Sender:</strong> {message.sender?.username || JSON.parse(localStorage.getItem('user')).username}
+
                         </p>
 
                         <div className=" flex gap-[24px]  ">
@@ -880,7 +934,7 @@ const Discussions = () => {
                               )}
 
                             <p>
-                              <ReadIcon />
+                            <ReadIcon iconColor={ message?.isReadByAll.length === groupChatRoom.users.length ? "#1600D0" : "#57585C" }/>
                             </p>
                           </div>
 
