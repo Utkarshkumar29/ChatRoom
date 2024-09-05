@@ -36,7 +36,11 @@ const messageSchema = new mongoose.Schema(
         isStarred:[{
             type: mongoose.Schema.Types.ObjectId,
             ref:'User'
-        }]
+        }],
+        isReadByAll:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref:'User'
+        }
     },
     {
         timestamps: true

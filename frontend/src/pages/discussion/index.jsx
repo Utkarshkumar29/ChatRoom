@@ -28,6 +28,8 @@ import DownArrow from "../../assets/icons/DownArrow";
 import StarIcon from "../../assets/icons/StarIcon";
 import EmojiPicker from "emoji-picker-react";
 import FilterIcon from "../../assets/icons/FilterIcon";
+import ReadIcon from "../../assets/icons/ReadIcon";
+import EmojiIcon from "../../assets/icons/EmojiIcon";
 
 const Discussions = () => {
   const [openDiscussionModal, setOpenDiscussionModal] = useState(false);
@@ -53,10 +55,10 @@ const Discussions = () => {
   const [openStarChat, setOpenStarChat] = useState(false);
   const [starredMessages, setStarredMessages] = useState([]);
   const [openEmoji, setOpenEmoji] = useState(false);
-  const [editMessage,setEditMessage]=useState("")
-  const [selectMessage,setSelectMessage]=useState([])
-  const [allowSelect,setAllowSelect]=useState(false)
-  const [forward,setForward]=useState(false)
+  const [editMessage, setEditMessage] = useState("");
+  const [selectMessage, setSelectMessage] = useState([]);
+  const [allowSelect, setAllowSelect] = useState(false);
+  const [forward, setForward] = useState(false);
 
   const ENDPOINT = "http://localhost:5000";
   const socket = useRef(null);
@@ -136,6 +138,21 @@ const Discussions = () => {
 
       // Save the updated drafts back to localStorage
       localStorage.setItem("draftMessages", JSON.stringify(drafts));
+    }else{
+      const newMessage = emoji;
+      setNewMessage(newMessage);
+      setDraftMessage(newMessage);
+      // Retrieve existing drafts from localStorage
+      const drafts = JSON.parse(localStorage.getItem("draftMessages")) || {};
+
+      // Update the draft for the current chat room
+      drafts[groupChatRoom?._id] = {
+        draftMessage,
+        groupChatRoom,
+      };
+
+      // Save the updated drafts back to localStorage
+      localStorage.setItem("draftMessages", JSON.stringify(drafts));
     }
   };
 
@@ -160,17 +177,21 @@ const Discussions = () => {
   // Send a new message
   const sendMessage = async () => {
     try {
-      if(editMessage){
-        const response=await axios.put("/api/message/edit",{
-          messageId:editMessage._id,
-          content:newMessage
-        })
-        setChatMessage((message)=>{
-          return message.map((item)=>item._id==editMessage._id ? {...item,content:newMessage}: item)
-        })
+      if (editMessage) {
+        const response = await axios.put("/api/message/edit", {
+          messageId: editMessage._id,
+          content: newMessage,
+        });
+        setChatMessage((message) => {
+          return message.map((item) =>
+            item._id == editMessage._id
+              ? { ...item, content: newMessage }
+              : item
+          );
+        });
         setNewMessage("");
         const drafts = JSON.parse(localStorage.getItem("draftMessages")) || {};
-  
+
         // Remove the specific draft for the current chat room
         delete drafts[groupChatRoom?._id];
         // Save the updated drafts back to localStorage
@@ -181,18 +202,20 @@ const Discussions = () => {
           delete updatedDrafts[groupChatRoom?._id];
           return updatedDrafts;
         });
-      }else{
+      } else {
         const response = await axios.post("/api/message", {
           chatId: groupChatRoom?._id,
           content: newMessage,
           replyTo: replyTo,
+          messageType: "text",
+          link: null,
         });
         console.log("Message sent response:", response.data);
         setChatMessage((prevMessages) => [...prevMessages, response.data]);
         socket.current.emit("newMessage", response.data);
         setNewMessage("");
         const drafts = JSON.parse(localStorage.getItem("draftMessages")) || {};
-  
+
         // Remove the specific draft for the current chat room
         delete drafts[groupChatRoom?._id];
         // Save the updated drafts back to localStorage
@@ -288,10 +311,12 @@ const Discussions = () => {
     console.log(file[0]);
 
     try {
+      const metadata = {
+        contentType: "image/png",
+      };
       const storageRef = ref(storage, `files/${file[0].name}`);
-      const uploadTask = uploadBytesResumable(storageRef, file);
+      const uploadTask = uploadBytesResumable(storageRef, file[0], metadata);
 
-      // Track upload progress
       uploadTask.on(
         "state_changed",
         (snapshot) => {
@@ -300,11 +325,9 @@ const Discussions = () => {
           setProgress(progress);
         },
         (error) => {
-          // Handle unsuccessful uploads
           console.error("File upload error:", error);
         },
         async () => {
-          // Handle successful uploads
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setFileUrl(downloadURL);
           console.log("File available at:", downloadURL);
@@ -314,7 +337,7 @@ const Discussions = () => {
             chatId: groupChatRoom?._id,
             content: null,
             link: downloadURL,
-            messageType: "pdf",
+            messageType: file[0].type,
           });
 
           console.log("Message sent response:", response.data);
@@ -520,6 +543,22 @@ const Discussions = () => {
     console.log(selectMessage, "firepower");
   }, [selectMessage]);
 
+  const extractFileName = (url) => {
+    // Decode URL components
+    const decodedUrl = decodeURIComponent(url);
+    console.log(decodedUrl, "decode1231");
+    // Split URL by '/' and get the last segment before '?'
+    const parts = decodedUrl.split("/");
+    console.log(parts, "decode1232");
+    const fileNameWithQuery = parts.pop();
+    console.log(fileNameWithQuery, "decode1233");
+    const fileName = fileNameWithQuery.split("?")[0];
+    console.log(fileName, "decode1234");
+
+    return fileName;
+  };
+
+  console.log(user,'decode')
   return (
     <>
       <div className="w-full flex h-screen bg-red-800">
@@ -683,13 +722,9 @@ const Discussions = () => {
                 {groupChatRoom?.chatName}{" "}
                 <span className="  rounded-lg text-sm ">{chatcount}</span>
               </div>
-              dd
               {pinnedMessages.map((message, index) => {
                 return (
-                  <div className=" bg-red-500 ">
-                    {message.sender.username}
-                    {message.content && <p>{message.content}</p>}
-
+                  <div key={index} className="mb-2 bg-red-400">
                     <p
                       className=" bg-yellow-300 cursor-pointer "
                       onClick={() => {
@@ -698,6 +733,70 @@ const Discussions = () => {
                     >
                       Unpin
                     </p>
+                    {allowSelect && (
+                      <input
+                        type="checkbox"
+                        onClick={() =>
+                          setSelectMessage((prev) => {
+                            return [...prev, message];
+                          })
+                        }
+                      />
+                    )}
+                    <p>
+                      <strong>Sender:</strong> {message.sender.username}
+                    </p>
+
+                    <div className=" flex gap-[24px]  ">
+                      {!message.isDeleted || !message.isDeletedForEveryOne ? (
+                        <p>{message.content}</p>
+                      ) : (
+                        <p>Message is deleted</p>
+                      )}
+
+                      {message.messageType == "application/pdf" && (
+                        <div>
+                          <p>{extractFileName(message.link)}</p>
+                          <a href={message.link}>PDF</a>
+                        </div>
+                      )}
+
+                      <div>
+                        {message?.messageType == "image/png" &&
+                          message.link != null && (
+                            <img
+                              src={message.link}
+                              alt="Uploaded file"
+                              style={{ maxWidth: "100%", height: "auto" }}
+                            />
+                          )}
+
+                        {message?.messageType == "application/msword" &&
+                          message.link != null && (
+                            <div>
+                              <p>{extractFileName(message.link)}</p>
+                              <a href={message.link}>Word</a>
+                            </div>
+                          )}
+
+                        {message?.messageType == "application/vnd.ms-excel" &&
+                          message.link != null && (
+                            <div>
+                              <p>{extractFileName(message.link)}</p>
+                              <a href={message.link}>Word</a>
+                            </div>
+                          )}
+
+                        {message?.messageType ==
+                          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
+                          message.link != null && (
+                            <div>
+                              <p>{extractFileName(message.link)}</p>
+                              <a href={message.link}>Word</a>
+                            </div>
+                          )}
+                      </div>
+                    </div>
                   </div>
                 );
               })}
@@ -707,128 +806,187 @@ const Discussions = () => {
                 hasMore={hasMoreData}
                 loader={<h4>Loading...</h4>}
                 scrollableTarget="scrollableDiv"
-                className="bg-violet-700"
-                height={"40vh"}
+                className=" bg-green-500 "
+                height={"50vh"}
               >
-                {chatMessage?.map((message, index) => (
-                  <>
-                    <div key={index} className="mb-2">
-                      {allowSelect && <input type="checkbox" onClick={()=>setSelectMessage((prev)=>{
-                        return [...prev,message]
-                      })}/>}
-                      <p>
-                        <strong>Sender:</strong> {message.sender.username}
-                      </p>
-
-                      <div className=" flex gap-[24px]  ">
-                        {!message.isDeleted || !message.isDeletedForEveryOne ? (
-                          <p>{message.content}</p>
-                        ) : (
-                          <p>Message is deleted</p>
+                {chatMessage?.map((message, index) => {
+                  console.log(message.link, "File available at:");
+                  return (
+                    <>
+                      <div key={index} className="mb-2">
+                        {allowSelect && (
+                          <input
+                            type="checkbox"
+                            onClick={() =>
+                              setSelectMessage((prev) => {
+                                return [...prev, message];
+                              })
+                            }
+                          />
                         )}
+                        <p>
+                          <strong>Sender:</strong> {message.sender.username}
+                        </p>
 
-                        {message.messageType == "pdf" && (
-                          <a href={message.link}>PDF</a>
-                        )}
+                        <div className=" flex gap-[24px]  ">
+                          {!message.isDeleted ||
+                          !message.isDeletedForEveryOne ? (
+                            <p>{message.content}</p>
+                          ) : (
+                            <p>Message is deleted</p>
+                          )}
 
-                        <Menu>
-                          <MenuButton>
-                            <DownArrow />
-                          </MenuButton>
-                          <MenuItems anchor="bottom">
-                            <div className=" bg-white ">
-                              <MenuItem>
-                                <p
-                                  className="block data-[focus]:bg-blue-100"
-                                  onClick={() => {
-                                    setReplyTo(message.sender?._id);
-                                    setReplyToUserName(message.sender.username);
-                                  }}
-                                >
-                                  Reply To
-                                </p>
-                              </MenuItem>
-                              <MenuItem>
-                                <p
-                                  className="block data-[focus]:bg-blue-100"
-                                  onClick={() => {
-                                    handleStarMessage(message, false);
-                                  }}
-                                >
-                                  Star
-                                </p>
-                              </MenuItem>
-                              <MenuItem>
-                                <p
-                                  className="block data-[focus]:bg-blue-100"
-                                  onClick={() => {
-                                    handlePinMessage(message);
-                                  }}
-                                >
-                                  Pin
-                                </p>
-                              </MenuItem>
-                              <MenuItem>
-                                <p
-                                  className="block data-[focus]:bg-blue-100"
-                                  onClick={() => {
-                                    setOpenDeleteModal(true);
-                                    setSelectedMessage(message);
-                                  }}
-                                >
-                                  Delete
-                                </p>
-                              </MenuItem>
-                              <MenuItem>
-                                <p
-                                  className="block data-[focus]:bg-blue-100"
-                                  onClick={()=>{setEditMessage(message)
-                                    setNewMessage(message.content)
-                                  }}
-                                >
-                                  Edit
-                                </p>
-                              </MenuItem>
-                              <MenuItem>
-                                <p
-                                  className="block data-[focus]:bg-blue-100"
-                                  onClick={()=>{setAllowSelect(true)
-                                    setSelectMessage((prev)=>{
-                                      return [...prev,message]
-                                    })
-                                  }}
-                                >
-                                  Select
-                                </p>
-                              </MenuItem>
-                              <MenuItem>
-                                <p
-                                  className="block data-[focus]:bg-blue-100"
-                                  onClick={()=>{ setForward(true) }}
-                                >
-                                  Forward
-                                </p>
-                              </MenuItem>
+                          {message.messageType == "application/pdf" && (
+                            <div>
+                              <p>{extractFileName(message.link)}</p>
+                              <a href={message.link}>PDF</a>
                             </div>
-                          </MenuItems>
-                        </Menu>
+                          )}
+
+                          <div>
+                            {message?.messageType == "image/png" &&
+                              message.link != null && (
+                                <img
+                                  src={message.link}
+                                  alt="Uploaded file"
+                                  style={{ maxWidth: "100%", height: "auto" }}
+                                />
+                              )}
+
+                            {message?.messageType == "application/msword" &&
+                              message.link != null && (
+                                <div>
+                                  <p>{extractFileName(message.link)}</p>
+                                  <a href={message.link}>Word</a>
+                                </div>
+                              )}
+
+                            {message?.messageType ==
+                              "application/vnd.ms-excel" &&
+                              message.link != null && (
+                                <div>
+                                  <p>{extractFileName(message.link)}</p>
+                                  <a href={message.link}>Word</a>
+                                </div>
+                              )}
+
+                            {message?.messageType ==
+                              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
+                              message.link != null && (
+                                <div>
+                                  <p>{extractFileName(message.link)}</p>
+                                  <a href={message.link}>Word</a>
+                                </div>
+                              )}
+
+                            <p>
+                              <ReadIcon />
+                            </p>
+                          </div>
+
+                          <Menu>
+                            <MenuButton>
+                              <DownArrow />
+                            </MenuButton>
+                            <MenuItems anchor="bottom">
+                              <div className=" bg-white ">
+                                <MenuItem>
+                                  <p
+                                    className="block data-[focus]:bg-blue-100"
+                                    onClick={() => {
+                                      setReplyTo(message.sender?._id);
+                                      setReplyToUserName(
+                                        message.sender.username
+                                      );
+                                    }}
+                                  >
+                                    Reply To
+                                  </p>
+                                </MenuItem>
+                                <MenuItem>
+                                  <p
+                                    className="block data-[focus]:bg-blue-100"
+                                    onClick={() => {
+                                      handleStarMessage(message, false);
+                                    }}
+                                  >
+                                    Star
+                                  </p>
+                                </MenuItem>
+                                <MenuItem>
+                                  <p
+                                    className="block data-[focus]:bg-blue-100"
+                                    onClick={() => {
+                                      handlePinMessage(message);
+                                    }}
+                                  >
+                                    Pin
+                                  </p>
+                                </MenuItem>
+                                <MenuItem>
+                                  <p
+                                    className="block data-[focus]:bg-blue-100"
+                                    onClick={() => {
+                                      setOpenDeleteModal(true);
+                                      setSelectedMessage(message);
+                                    }}
+                                  >
+                                    Delete
+                                  </p>
+                                </MenuItem>
+                                <MenuItem>
+                                  <p
+                                    className="block data-[focus]:bg-blue-100"
+                                    onClick={() => {
+                                      setEditMessage(message);
+                                      setNewMessage(message.content);
+                                    }}
+                                  >
+                                    Edit
+                                  </p>
+                                </MenuItem>
+                                <MenuItem>
+                                  <p
+                                    className="block data-[focus]:bg-blue-100"
+                                    onClick={() => {
+                                      setAllowSelect(true);
+                                      setSelectMessage((prev) => {
+                                        return [...prev, message];
+                                      });
+                                    }}
+                                  >
+                                    Select
+                                  </p>
+                                </MenuItem>
+                                <MenuItem>
+                                  <p
+                                    className="block data-[focus]:bg-blue-100"
+                                    onClick={() => {
+                                      setForward(true);
+                                    }}
+                                  >
+                                    Forward
+                                  </p>
+                                </MenuItem>
+                              </div>
+                            </MenuItems>
+                          </Menu>
+                        </div>
                       </div>
-                    </div>
-                  </>
-                ))}
+                    </>
+                  );
+                })}
               </InfiniteScroll>
               <div className="absolute bottom-0 flex flex-col w-full p-2 bg-white border-t border-gray-300">
-                
-                
                 {replyToUsername != null && (
                   <p>replying to {replyToUsername}</p>
                 )}
                 {allowSelect && (
-                  <div className=" flex "> 
+                  <div className=" flex ">
                     <p>Star</p>
                     <p>Copy</p>
                     <p>Forward</p>
-                    <p>Delete</p>  
+                    <p>Delete</p>
                     <button>cancel</button>
                   </div>
                 )}
@@ -838,10 +996,11 @@ const Discussions = () => {
                 </label>
                 <div
                   onClick={() => {
-                    setOpenEmoji(true);
+                    setOpenEmoji(!openEmoji);
                   }}
                 >
-                  {openEmoji ? (
+                  <p><EmojiIcon/></p>
+                  {openEmoji && (
                     <EmojiPicker
                       onEmojiClick={(emojiObject, event) => {
                         handleMessageChange(
@@ -852,8 +1011,6 @@ const Discussions = () => {
                       }}
                       open={openEmoji}
                     />
-                  ) : (
-                    <p>o</p>
                   )}
                 </div>
                 <input
@@ -997,83 +1154,80 @@ const Discussions = () => {
               </DialogTitle>
               <div className="mt-2">
                 <Description>
-                <div>
-              {groups &&
-                !openDraft &&
-                groups.map((group, index) => {
-                  console.log(group?._id, draftMessages, " Draft:");
-                  return (
-                    <div key={index}>
-                      <p
-                        className="hover:bg-orange-400 cursor-pointer p-2 rounded-md flex gap-[12px] "
-                        onClick={() => {
-                          setGroupChatRoom(group);
-                          setOpenStarChat(false);
-                        }}
-                      >
-                        <img
-                          src={group.groupAdmin.pic}
-                          className=" w-[48px] h-[48px] rounded-full "
-                        />
-                        <div>
-                          <p>{group.chatName}</p>
-                          <p>
-                            {draftMessages && draftMessages[group?._id]
-                              ? `Draft: ${
-                                  draftMessages[group?._id]?.draftMessage
-                                }`
-                              : group?.latestMessage?.content}
-                          </p>
-                        </div>
-                      </p>
-                    </div>
-                  );
-                })}
-              {openDraft &&
-                Object.values(draftMessages).map((group, index) => {
-                  console.log(
-                    group.groupChatRoom?._id,
-                    draftMessages,
-                    " Draft:"
-                  );
-                  return (
-                    <div key={index}>
-                      <p
-                        className="hover:bg-orange-400 cursor-pointer p-2 rounded-md flex gap-[12px]"
-                        onClick={() => {
-                          setGroupChatRoom(group.groupChatRoom);
-                          setOpenStarChat(false);
-                        }}
-                      >
-                        <img
-                          src={group.groupChatRoom.groupAdmin.pic}
-                          className="w-[48px] h-[48px] rounded-full"
-                        />
-                        <div>
-                          <p>{group.groupChatRoom.chatName}</p>
-                          <p>
-                            {draftMessages[group.groupChatRoom._id]
-                              ? `Draft: ${
-                                  draftMessages[group.groupChatRoom._id]
-                                    ?.draftMessage
-                                }`
-                              : group.groupChatRoom.latestMessage?.content}
-                          </p>
-                        </div>
-                      </p>
-                    </div>
-                  );
-                })}
-            </div>
+                  <div>
+                    {groups &&
+                      !openDraft &&
+                      groups.map((group, index) => {
+                        console.log(group?._id, draftMessages, " Draft:");
+                        return (
+                          <div key={index}>
+                            <p
+                              className="hover:bg-orange-400 cursor-pointer p-2 rounded-md flex gap-[12px] "
+                              onClick={() => {
+                                setGroupChatRoom(group);
+                                setOpenStarChat(false);
+                              }}
+                            >
+                              <img
+                                src={group.groupAdmin.pic}
+                                className=" w-[48px] h-[48px] rounded-full "
+                              />
+                              <div>
+                                <p>{group.chatName}</p>
+                                <p>
+                                  {draftMessages && draftMessages[group?._id]
+                                    ? `Draft: ${
+                                        draftMessages[group?._id]?.draftMessage
+                                      }`
+                                    : group?.latestMessage?.content}
+                                </p>
+                              </div>
+                            </p>
+                          </div>
+                        );
+                      })}
+                    {openDraft &&
+                      Object.values(draftMessages).map((group, index) => {
+                        console.log(
+                          group.groupChatRoom?._id,
+                          draftMessages,
+                          " Draft:"
+                        );
+                        return (
+                          <div key={index}>
+                            <p
+                              className="hover:bg-orange-400 cursor-pointer p-2 rounded-md flex gap-[12px]"
+                              onClick={() => {
+                                setGroupChatRoom(group.groupChatRoom);
+                                setOpenStarChat(false);
+                              }}
+                            >
+                              <img
+                                src={group.groupChatRoom.groupAdmin.pic}
+                                className="w-[48px] h-[48px] rounded-full"
+                              />
+                              <div>
+                                <p>{group.groupChatRoom.chatName}</p>
+                                <p>
+                                  {draftMessages[group.groupChatRoom._id]
+                                    ? `Draft: ${
+                                        draftMessages[group.groupChatRoom._id]
+                                          ?.draftMessage
+                                      }`
+                                    : group.groupChatRoom.latestMessage
+                                        ?.content}
+                                </p>
+                              </div>
+                            </p>
+                          </div>
+                        );
+                      })}
+                  </div>
                 </Description>
                 <div className=" border-t border-[#5758C] flex gap-[24px] ">
-                  <button onClick={() => setForward(false)}>
-                    Cancel
-                  </button>
+                  <button onClick={() => setForward(false)}>Cancel</button>
                   {selectedMessage?.sender?._id != user?._id && (
-                    <button onClick={false}>
-                      Forward
-                    </button>
+                    <button onClick={false}>Forward</button>
                   )}
                 </div>
               </div>
