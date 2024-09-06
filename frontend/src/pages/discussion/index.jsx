@@ -30,6 +30,13 @@ import EmojiPicker from "emoji-picker-react";
 import FilterIcon from "../../assets/icons/FilterIcon";
 import ReadIcon from "../../assets/icons/ReadIcon";
 import EmojiIcon from "../../assets/icons/EmojiIcon";
+import SearchIcon from "../../assets/icons/SearchIcon";
+import DraftMessagesIcon from "../../assets/icons/DraftMessagesIcon";
+import ArchiveIcon from "../../assets/icons/ArchiveIcon";
+import UnreadMessageIcon from "../../assets/icons/UnreadMessageIcon";
+import AllChats from "../../assets/icons/AllChats";
+import { formatDistanceToNow } from 'date-fns';
+
 
 const Discussions = () => {
   const [openDiscussionModal, setOpenDiscussionModal] = useState(false);
@@ -611,28 +618,95 @@ const Discussions = () => {
     }
   }
 
+  const handleGroupOpen=(group)=>{
+    setGroupChatRoom(group);
+    setOpenStarChat(false);
+  }
+
+  const getTimeAgo = (createdAt) => {
+    const now = new Date();
+    const createdDate = new Date(createdAt);
+    const diffInMs = now - createdDate;
+  
+    const diffInSeconds = Math.floor(diffInMs / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+    const diffInMonths = Math.floor(diffInDays / 30);
+    const diffInYears = Math.floor(diffInMonths / 12);
+  
+    if (diffInYears > 0) return `${diffInYears}y`;
+    if (diffInMonths > 0) return `${diffInMonths}mo`;
+    if (diffInDays > 0) return `${diffInDays}d`;
+    if (diffInHours > 0) return `${diffInHours}h`;
+    if (diffInMinutes > 0) return `${diffInMinutes}m`;
+    return ``;
+  };
+
   console.log(groupChatRoom,'decode')
   return (
     <>
-      <div className="w-full flex h-screen bg-red-800">
-        <div className="h-full flex flex-col items-center gap-[24px] flex-1 bg-teal-400">
-          <div>
-            <Link to="/chatRoom">Messages</Link>
-            <Link to="/discussions">Discussions</Link>
+      <div className="w-full flex h-screen bg-[#F2F3F5] py-[60px] px-[80px] gap-[32px]  ">
+        <div className="h-full flex flex-col items-center gap-[24px] flex-1 max-w-[500px] ">
+          <div className=" max-w-[7 00px] bg-[#FFFFFF] w-full flex items-center justify-evenly py-[16px] px-[24px] rounded-2xl border border-[#D7D7D8] gap-[24px] ">
+            <Link to="/chatRoom" className="w-full text-[#1660CD] bg-[#FFFFFF] py-[12px] px-[32px] rounded-xl border border-[#1600CD] text-center ">Messages</Link>
+            <Link to="/discussions" className="w-full bg-[#1660CD] text-[#FFFFFF] py-[12px] px-[32px] rounded-xl text-center ">Discussions</Link>
           </div>
-          <div>
-            <div className="flex">
+          <div className=" relative bg-[#FFFFFF] w-full h-full rounded-2xl border border-[#D7D7D8] ">
+            <div className="flex  items-center justify-between font-semibold text-lg border-b border-[#D7D7D8] py-[16px] px-[24px] ">My Discussion Room
+              <div className=" relative top-1 ">
+              <Menu>
+                <MenuButton>
+                  <FilterIcon />
+                </MenuButton>
+                <MenuItems anchor="bottom ">
+                  <div className=" bg-white w-[200px] flex flex-col justify-center rounded-3xl border border-[#D7D7D8] rounded-tr-[2px]  ">
+                    <MenuItem>
+                      <div
+                        className="flex  data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px]  hover:rounded-tl-2xl  "
+                        onClick={() => {
+                          setOpenDraft(false);
+                        }}
+                      >
+                        <AllChats/>
+                        All Chats
+                      </div>
+                    </MenuItem>
+                    <MenuItem>
+                      <div className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] border border-[#D7D7D8] ">
+                        <UnreadMessageIcon/>
+                        Unread Chats
+                      </div>
+                    </MenuItem>
+                    <MenuItem>
+                      <div className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] border border-[#D7D7D8] border-t-0  ">
+                        <ArchiveIcon/>
+                        Archived Chats
+                      </div>
+                    </MenuItem>
+                    <MenuItem>
+                      <div
+                        className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] hover:rounded-b-2xl    "
+                        onClick={() => setOpenDraft(true)}
+                      >
+                        <DraftMessagesIcon/>
+                        Drafts
+                      </div>
+                    </MenuItem>
+                  </div>
+                </MenuItems>
+              </Menu>
+              </div>
+            </div>
+            <div className="flex p-[24px] items-center gap-[16px] ">
+              <div className="outline-none flex gap-[12px] border border-[#D7D7D8] py-[10px] px-[12px] bg-[#F2F3F5] rounded-xl">
+                <SearchIcon/>
               <input
                 placeholder="Search users"
                 onChange={(e) => handleSearch(e.target.value)}
-                className="outline-none border border-gray-300 p-2 rounded-md"
+                className="bg-[#F2F3F5]"
               />
-              <span
-                onClick={() => setOpenDiscussionModal(true)}
-                className="ml-2 cursor-pointer"
-              >
-                <PlusIcon />
-              </span>
+              </div>
               <span
                 onClick={() => {
                   setOpenStarChat(true);
@@ -640,71 +714,37 @@ const Discussions = () => {
               >
                 <StarIcon />
               </span>
-              <Menu>
-                <MenuButton>
-                  <FilterIcon />
-                </MenuButton>
-                <MenuItems anchor="bottom">
-                  <div className=" bg-white ">
-                    <MenuItem>
-                      <p
-                        className="block data-[focus]:bg-blue-100"
-                        onClick={() => {
-                          setOpenDraft(false);
-                        }}
-                      >
-                        All Chats
-                      </p>
-                    </MenuItem>
-                    <MenuItem>
-                      <p className="block data-[focus]:bg-blue-100">
-                        Unread Chats
-                      </p>
-                    </MenuItem>
-                    <MenuItem>
-                      <p className="block data-[focus]:bg-blue-100">
-                        Archived Chats
-                      </p>
-                    </MenuItem>
-                    <MenuItem>
-                      <p
-                        className="block data-[focus]:bg-blue-100"
-                        onClick={() => setOpenDraft(true)}
-                      >
-                        Drafts
-                      </p>
-                    </MenuItem>
-                  </div>
-                </MenuItems>
-              </Menu>
+              <span
+                onClick={() => setOpenDiscussionModal(true)}
+                className="cursor-pointer  bg-[#1660CD] text-[#FFFFFF] py-[12px] px-[20px] rounded-xl "
+              >
+                New Room
+              </span>
             </div>
-            <div>
+            <div className=" p-[24px] pt-0 ">
               {groups &&
                 !openDraft &&
                 groups.map((group, index) => {
-                  console.log(group?._id, draftMessages, " Draft:");
+                  console.log(group, " Draft:1");
                   return (
                     <div key={index}>
                       <p
-                        className="hover:bg-orange-400 cursor-pointer p-2 rounded-md flex gap-[12px] "
-                        onClick={() => {
-                          setGroupChatRoom(group);
-                          setOpenStarChat(false);
-                        }}
+                        className={` ${groupChatRoom?._id==group?._id && "bg-[#E8EFFA] "} cursor-pointer p-[12px] rounded-xl flex gap-[12px] `}
+                        onClick={() => { handleGroupOpen(group) }}
                       >
                         <img
                           src={group.groupAdmin.pic}
                           className=" w-[48px] h-[48px] rounded-full "
                         />
-                        <div>
-                          <p>{group.chatName}</p>
-                          <p>
-                            {draftMessages && draftMessages[group?._id]
-                              ? `Draft: ${
-                                  draftMessages[group?._id]?.draftMessage
-                                }`
-                              : group?.latestMessage?.content}
-                          </p>
+                        <div className=" w-full ">
+                          <div className=" flex justify-between w-full items-center " >
+                            <p className=" font-medium text-base ">{group.chatName}</p>
+                            <p className=" text-[#949497] text-[12px] leading-[18px] ">{getTimeAgo(group?.latestMessage?.createdAt)}</p>
+                          </div>
+                          <div className=" flex w-full justify-between ">
+                            <p>{draftMessages && draftMessages[group?._id] ? `Draft: ${ draftMessages[group?._id]?.draftMessage}` : group?.latestMessage?.content ?? "Start a converstion"}</p>
+                            <p className=" bg-[#1660CD] text-[10px] text-white rounded-lg py-[6px] px-[8px] max-h-[20px] max-w-[22px] flex items-center ">2</p>
+                          </div>
                         </div>
                       </p>
                     </div>
@@ -712,11 +752,7 @@ const Discussions = () => {
                 })}
               {openDraft &&
                 Object.values(draftMessages).map((group, index) => {
-                  console.log(
-                    group.groupChatRoom?._id,
-                    draftMessages,
-                    " Draft:"
-                  );
+                  
                   return (
                     <div key={index}>
                       <p
@@ -769,11 +805,13 @@ const Discussions = () => {
             </div>
           </div>
         ) : (
-          <div className="flex flex-1 bg-slate-500 p-[32px]">
-            <div className="relative bg-white w-full h-full">
-              <div className="font-bold text-xl mb-2">
-                {groupChatRoom?.chatName}{" "}
-                <span className="  rounded-lg text-sm ">{chatcount}</span>
+          groupChatRoom ? (
+            <div className="flex flex-col border border-[#D7D7D8] rounded-2xl relative bg-white w-full h-full ">
+              <div className="font-bold text-xl py-[16px] px-[24px] relative ">
+                {groupChatRoom?.chatName}
+
+                <div className=" absolute bg-red-500 -bottom-12 ">1</div>
+                <div className=" absolute bg-red-500 -bottom-12 ">1</div>
               </div>
               {pinnedMessages.map((message, index) => {
                 return (
@@ -1087,8 +1125,11 @@ const Discussions = () => {
                   Send
                 </button>
               </div>
-            </div>
+            
           </div>
+          ):(
+            <div>Select a room</div>
+          )
         )}
       </div>
 
@@ -1212,7 +1253,6 @@ const Discussions = () => {
                     {groups &&
                       !openDraft &&
                       groups.map((group, index) => {
-                        console.log(group?._id, draftMessages, " Draft:");
                         return (
                           <div key={index}>
                             <p
