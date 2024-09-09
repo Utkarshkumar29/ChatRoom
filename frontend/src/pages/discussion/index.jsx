@@ -35,14 +35,25 @@ import DraftMessagesIcon from "../../assets/icons/DraftMessagesIcon";
 import ArchiveIcon from "../../assets/icons/ArchiveIcon";
 import UnreadMessageIcon from "../../assets/icons/UnreadMessageIcon";
 import AllChats from "../../assets/icons/AllChats";
-import { formatDistanceToNow } from 'date-fns';
-
+import { formatDistanceToNow } from "date-fns";
+import SendIcon from "../../assets/icons/SendIcon";
+import CopyIcon from "../../assets/icons/CopyIcon";
+import PinIcon from "../../assets/icons/PinIcon";
+import TrashIcon from "../../assets/icons/TrashIcon";
+import SelectIcon from "../../assets/icons/SelectIcon";
+import ForwardIcon from "../../assets/icons/ForwardIcon";
+import StarMessageIcon from "../../assets/icons/StarMessageIcon";
+import CloseIcon from "../../assets/icons/CloseIcon";
+import DownloadIcon from "../../assets/icons/DownloadIcon";
+import PDFIcon from "../../assets/icons/PDFIcon"
+import ExcelIcon from "../../assets/icons/ExcelIcon";
 
 const Discussions = () => {
   const [openDiscussionModal, setOpenDiscussionModal] = useState(false);
   const [users, setUsers] = useState([]);
   const [userList, setUserList] = useState([]);
   const [groupName, setGroupName] = useState("");
+  const [groupDescription, setGroupDescription] = useState("");
   const [groups, setGroups] = useState([]);
   const [groupChatRoom, setGroupChatRoom] = useState(null);
   const [newMessage, setNewMessage] = useState("");
@@ -52,7 +63,7 @@ const Discussions = () => {
   const [chatcount, setChatCount] = useState(null);
   const [hasMoreData, setHasMoreData] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
-  const [replyToUsername, setReplyToUserName] = useState(null);
+  const [replyMessage, setReplyMessage] = useState(null);
   const [pinMessage, setPinMessage] = useState(false);
   const [deleteMsg, setDeleteMsg] = useState(false);
   const [deleteForEveryone, setDeleteForEveryone] = useState(false);
@@ -66,7 +77,13 @@ const Discussions = () => {
   const [selectMessage, setSelectMessage] = useState([]);
   const [allowSelect, setAllowSelect] = useState(false);
   const [forward, setForward] = useState(false);
-  
+  const [openMenuIndex, setOpenMenuIndex] = useState(null);
+
+  const userId = JSON.parse(localStorage.getItem("user"))._id;
+
+  useEffect(() => {
+    console.log(openMenuIndex, "power");
+  }, [openMenuIndex]);
 
   const ENDPOINT = "http://localhost:5000";
   const socket = useRef(null);
@@ -77,7 +94,6 @@ const Discussions = () => {
 
     socket.current.on("connection", () => {
       setSocketConnected(true);
-      console.log("Socket connected:", socket.current.id);
     });
 
     socket.current.emit("setup", user);
@@ -87,7 +103,6 @@ const Discussions = () => {
   const handleSearch = async (keyword) => {
     try {
       const response = await axios.get(`/api/user?search=${keyword}`);
-      console.log("User search response:", response.data);
       setUserList(response.data);
     } catch (error) {
       console.error("Error searching users:", error);
@@ -100,10 +115,11 @@ const Discussions = () => {
     const data = {
       name: groupName,
       users: users,
+      description: groupDescription,
+      groupPic: fileUrl,
     };
     try {
       const response = await axios.post("/api/chats/group", data);
-      console.log("Discussion room created:", response.data);
       setOpenDiscussionModal(false); // Close modal after creation
       accessChat(); // Refresh chat list after creating a room
     } catch (error) {
@@ -115,12 +131,10 @@ const Discussions = () => {
   const accessChat = async () => {
     try {
       const response = await axios.get("/api/chats");
-      console.log("API response:", response.data); // Log the API response to check data
       const filterGroups = response.data.filter(
         (group) => group.isGroupChat === true
       );
       setGroups(filterGroups);
-      console.log("Filtered groups:", filterGroups); // Log filtered groups to ensure correctness
     } catch (error) {
       console.error("Error fetching chats:", error);
     }
@@ -146,7 +160,7 @@ const Discussions = () => {
 
       // Save the updated drafts back to localStorage
       localStorage.setItem("draftMessages", JSON.stringify(drafts));
-    }else{
+    } else {
       const newMessage = emoji;
       setNewMessage(newMessage);
       setDraftMessage(newMessage);
@@ -173,10 +187,8 @@ const Discussions = () => {
     const draft = Object.values(drafts).find(
       (message) => message?.groupChatRoom?._id == groupChatRoom?._id
     );
-    console.log(draft, "fired");
     if (draft) {
       setNewMessage(draft?.draftMessage);
-      console.log(draftMessages, "fired");
     } else {
       setNewMessage("");
     }
@@ -210,6 +222,23 @@ const Discussions = () => {
           delete updatedDrafts[groupChatRoom?._id];
           return updatedDrafts;
         });
+      } else if( fileUrl ){
+        
+          // Send message with file URL
+          if (groupChatRoom?._id && fileUrl && file?.[0]?.type) {
+            const response = await axios.post("/api/message", {
+                chatId: groupChatRoom._id,
+                content: null,
+                link: fileUrl,
+                messageType: file[0].type,
+            });
+            setChatMessage((prevMessages) => [...prevMessages, response.data]);
+            socket.current.emit("newMessage", response.data);
+            setNewMessage("");
+            console.log('power1',groupChatRoom?._id,fileUrl,file?.[0]?.type)
+            setFile(null)
+        }
+        console.log('power1',groupChatRoom?._id,fileUrl,file)
       } else {
         const response = await axios.post("/api/message", {
           chatId: groupChatRoom?._id,
@@ -217,8 +246,8 @@ const Discussions = () => {
           replyTo: replyTo,
           messageType: "text",
           link: null,
+          replyMessage: replyMessage,
         });
-        console.log("Message sent response:", response.data);
         setChatMessage((prevMessages) => [...prevMessages, response.data]);
         socket.current.emit("newMessage", response.data);
         setNewMessage("");
@@ -234,22 +263,30 @@ const Discussions = () => {
           delete updatedDrafts[groupChatRoom?._id];
           return updatedDrafts;
         });
+        setReplyTo(null)
+        setReplyMessage(null)
       }
     } catch (error) {
       console.log("Error sending message:", error);
     }
   };
 
+  useEffect(() => {
+    console.log(replyMessage, "replyMessage");
+  }, [replyMessage]);
+
   // Handle incoming messages
   useEffect(() => {
     const handleMessageReceived = (newMessageReceived) => {
-      console.log("Message received:", newMessageReceived);
-      if (groupChatRoom) {
-        setChatMessage((prevMessages) => {
-          return [...prevMessages, newMessageReceived];
-        });
+      console.log("New message received:", newMessageReceived);
+      console.log("Current chat room ID:", groupChatRoom?._id);
+      console.log("Received message's chat ID:", newMessageReceived.chat?._id);
 
-        console.log(newMessageReceived.content, "rain");
+      if (
+        groupChatRoom &&
+        groupChatRoom?._id === newMessageReceived.chat?._id
+      ) {
+        setChatMessage((prevMessages) => [...prevMessages, newMessageReceived]);
       } else {
         console.log("Message received in a different chat.");
       }
@@ -257,11 +294,12 @@ const Discussions = () => {
 
     socket.current.on("message received", handleMessageReceived);
 
-    // Clean up listener on component unmount or chatId change
     return () => {
       socket.current.off("message received", handleMessageReceived);
     };
-  }, [groupChatRoom]); // Added dependency
+  }, [groupChatRoom]);
+
+  useEffect(() => {}, [chatMessage]);
 
   const [nextLink, setNextLink] = useState("");
   // Fetch chat messages
@@ -273,14 +311,11 @@ const Discussions = () => {
       setChatMessage(response.data.results);
       setChatCount(response.data.count);
       setNextLink(response.data.links.next);
-      console.log(response.data.results, "Message received:");
       socket.current.emit("join chat", groupChatRoom?._id);
     } catch (error) {
       console.log("Error fetching chat messages:", error);
     }
   };
-
-  console.log(user);
 
   const fetchMoreChats = async () => {
     try {
@@ -316,7 +351,6 @@ const Discussions = () => {
     if (!file) return;
 
     setFile(file);
-    console.log(file[0]);
 
     try {
       const metadata = {
@@ -338,20 +372,38 @@ const Discussions = () => {
         async () => {
           const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
           setFileUrl(downloadURL);
-          console.log("File available at:", downloadURL);
+        }
+      );
+    } catch (error) {
+      console.error("Error during file upload:", error);
+    }
+  };
 
-          // Send message with file URL
-          const response = await axios.post("/api/message", {
-            chatId: groupChatRoom?._id,
-            content: null,
-            link: downloadURL,
-            messageType: file[0].type,
-          });
+  const handleGroupImage = async (file) => {
+    if (!file) return;
 
-          console.log("Message sent response:", response.data);
-          setChatMessage((prevMessages) => [...prevMessages, response.data]);
-          socket.current.emit("newMessage", response.data);
-          setNewMessage("");
+    setFile(file);
+
+    try {
+      const metadata = {
+        contentType: "image/png",
+      };
+      const storageRef = ref(storage, `files/${file[0].name}`);
+      const uploadTask = uploadBytesResumable(storageRef, file[0], metadata);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          setProgress(progress);
+        },
+        (error) => {
+          console.error("File upload error:", error);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          setFileUrl(downloadURL);
         }
       );
     } catch (error) {
@@ -421,9 +473,7 @@ const Discussions = () => {
     socket.current.on("messageDeleted", handleMessageDeletedForAll);
   }, [groupChatRoom]);
 
-  useEffect(() => {
-    console.log(chatMessage, "fire");
-  }, [chatMessage]);
+  useEffect(() => {}, [chatMessage]);
 
   //star messages======================================================
   const handleStarMessage = async (data, isStarred) => {
@@ -443,14 +493,14 @@ const Discussions = () => {
         });
       }
     } catch (error) {
-      console.log(error, "plant  ");
+      console.log(error);
     }
   };
 
   const getStarMessage = async () => {
     try {
       const response = await axios.get(`/api/message/star`);
-      console.log(response, "plantss");
+
       setStarredMessages(response.data.messages);
     } catch (error) {
       console.log(error);
@@ -459,13 +509,11 @@ const Discussions = () => {
 
   useEffect(() => {
     getStarMessage();
-    console.log(user, "plantss", starredMessages, openStarChat);
   }, [openStarChat]);
 
   //pin message===================================
   const [pinnedMessages, setPinnedMessages] = useState([]);
   const getPinnedMessages = async () => {
-    console.log("mate");
     try {
       const response = await axios.get(
         `/api/message/pinnedmessages/${groupChatRoom?._id}`
@@ -475,8 +523,6 @@ const Discussions = () => {
       console.log("Error fetching pinned messages", error); // Log errors to debug
     }
   };
-
-  console.log(groupChatRoom, "changed");
 
   useEffect(() => {
     if (groupChatRoom != null) {
@@ -518,7 +564,6 @@ const Discussions = () => {
 
   useEffect(() => {
     const handleIncommingPinnedMessage = (newPinMessaege) => {
-      console.log(newPinMessaege, "rain");
       setPinnedMessages((prev) => {
         return [...prev, newPinMessaege];
       });
@@ -535,7 +580,6 @@ const Discussions = () => {
 
   useEffect(() => {
     const handleIncommingUnPinnedMessage = (newPinMessaege) => {
-      console.log(newPinMessaege, "rain");
       setPinnedMessages((prev) =>
         prev.filter((message) => message?._id !== newPinMessaege?._id)
       );
@@ -547,94 +591,88 @@ const Discussions = () => {
     };
   }, [groupChatRoom]);
 
-  useEffect(() => {
-    console.log(selectMessage, "firepower");
-  }, [selectMessage]);
-
   const extractFileName = (url) => {
     // Decode URL components
     const decodedUrl = decodeURIComponent(url);
-    console.log(decodedUrl, "decode1231");
     // Split URL by '/' and get the last segment before '?'
     const parts = decodedUrl.split("/");
-    console.log(parts, "decode1232");
     const fileNameWithQuery = parts.pop();
-    console.log(fileNameWithQuery, "decode1233");
     const fileName = fileNameWithQuery.split("?")[0];
-    console.log(fileName, "decode1234");
 
     return fileName;
   };
 
-  const messageRef=useRef([])
+  const messageRef = useRef([]);
   const seenMessages = useRef(new Set());
 
-  useEffect(()=>{
-    const observer= new IntersectionObserver((enteries)=>{
-      enteries.forEach((entry)=>{
+  useEffect(() => {
+    const observer = new IntersectionObserver((enteries) => {
+      enteries.forEach((entry) => {
         if (entry.isIntersecting) {
-          const messageId = entry.target.getAttribute('data-id');
-          console.log(messageId,'decode1')
-          
+          const messageId = entry.target.getAttribute("data-id");
+
           // Avoid calling markAsSeen if the message is already seen
           if (!seenMessages.current.has(messageId)) {
             seenMessages.current.add(messageId); // Mark as seen
-            markAsSeen(messageId, JSON.parse(localStorage.getItem('user'))?._id);
+            markAsSeen(
+              messageId,
+              JSON.parse(localStorage.getItem("user"))?._id
+            );
           }
         }
-      })
-    })
+      });
+    });
 
-    messageRef.current.forEach((messageRef)=>{
-      if(messageRef){
-        observer.observe(messageRef)
+    messageRef.current.forEach((messageRef) => {
+      if (messageRef) {
+        observer.observe(messageRef);
       }
-    })
+    });
 
-    return ()=>{
-      messageRef.current.forEach((messageRef)=>{
-        if(messageRef){
-          observer.unobserve(messageRef)
+    return () => {
+      messageRef.current.forEach((messageRef) => {
+        if (messageRef) {
+          observer.unobserve(messageRef);
         }
-      })
-    }
-  },[chatMessage])
+      });
+    };
+  }, [chatMessage]);
 
-  const markAsSeen=async(messageId,userId)=>{
+  const markAsSeen = async (messageId, userId) => {
     try {
-        const response=await axios.put(`/api/message/seen`,{
-          messageId:messageId,
-          userId:userId
-        })
-        setChatMessage((messages) =>
-          messages.map((message) =>
-            message?._id === response?.data?.message?._id
-              ? { ...message, isReadByAll: [...message.isReadByAll, userId] }
-              : message
-          )
-        );
+      const response = await axios.put(`/api/message/seen`, {
+        messageId: messageId,
+        userId: userId,
+      });
+      setChatMessage((messages) =>
+        messages.map((message) =>
+          message?._id === response?.data?.message?._id
+            ? { ...message, isReadByAll: [...message.isReadByAll, userId] }
+            : message
+        )
+      );
     } catch (error) {
-        console.log(error)
+      console.log(error);
     }
-  }
+  };
 
-  const handleGroupOpen=(group)=>{
+  const handleGroupOpen = (group) => {
     setGroupChatRoom(group);
     setOpenStarChat(false);
-  }
+  };
 
   const getTimeAgo = (createdAt) => {
     const now = new Date();
     const createdDate = new Date(createdAt);
     const diffInMs = now - createdDate;
-  
+
     const diffInSeconds = Math.floor(diffInMs / 1000);
     const diffInMinutes = Math.floor(diffInSeconds / 60);
     const diffInHours = Math.floor(diffInMinutes / 60);
     const diffInDays = Math.floor(diffInHours / 24);
     const diffInMonths = Math.floor(diffInDays / 30);
     const diffInYears = Math.floor(diffInMonths / 12);
-  
+
     if (diffInYears > 0) return `${diffInYears}y`;
     if (diffInMonths > 0) return `${diffInMonths}mo`;
     if (diffInDays > 0) return `${diffInDays}d`;
@@ -643,69 +681,84 @@ const Discussions = () => {
     return ``;
   };
 
-  console.log(groupChatRoom,'decode')
+  const formatTime = (timestamp) => {
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
   return (
     <>
       <div className="w-full flex h-screen bg-[#F2F3F5] py-[60px] px-[80px] gap-[32px]  ">
         <div className="h-full flex flex-col items-center gap-[24px] flex-1 max-w-[500px] ">
           <div className=" max-w-[7 00px] bg-[#FFFFFF] w-full flex items-center justify-evenly py-[16px] px-[24px] rounded-2xl border border-[#D7D7D8] gap-[24px] ">
-            <Link to="/chatRoom" className="w-full text-[#1660CD] bg-[#FFFFFF] py-[12px] px-[32px] rounded-xl border border-[#1600CD] text-center ">Messages</Link>
-            <Link to="/discussions" className="w-full bg-[#1660CD] text-[#FFFFFF] py-[12px] px-[32px] rounded-xl text-center ">Discussions</Link>
+            <Link
+              to="/chatRoom"
+              className="w-full text-[#1660CD] bg-[#FFFFFF] py-[12px] px-[32px] rounded-xl border border-[#1600CD] text-center "
+            >
+              Messages
+            </Link>
+            <Link
+              to="/discussions"
+              className="w-full bg-[#1660CD] text-[#FFFFFF] py-[12px] px-[32px] rounded-xl text-center "
+            >
+              Discussions
+            </Link>
           </div>
           <div className=" relative bg-[#FFFFFF] w-full h-full rounded-2xl border border-[#D7D7D8] ">
-            <div className="flex  items-center justify-between font-semibold text-lg border-b border-[#D7D7D8] py-[16px] px-[24px] ">My Discussion Room
+            <div className="flex  items-center justify-between font-semibold text-lg border-b border-[#D7D7D8] py-[16px] px-[24px] ">
+              My Discussion Room
               <div className=" relative top-1 ">
-              <Menu>
-                <MenuButton>
-                  <FilterIcon />
-                </MenuButton>
-                <MenuItems anchor="bottom ">
-                  <div className=" bg-white w-[200px] flex flex-col justify-center rounded-3xl border border-[#D7D7D8] rounded-tr-[2px]  ">
-                    <MenuItem>
-                      <div
-                        className="flex  data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px]  hover:rounded-tl-2xl  "
-                        onClick={() => {
-                          setOpenDraft(false);
-                        }}
-                      >
-                        <AllChats/>
-                        All Chats
-                      </div>
-                    </MenuItem>
-                    <MenuItem>
-                      <div className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] border border-[#D7D7D8] ">
-                        <UnreadMessageIcon/>
-                        Unread Chats
-                      </div>
-                    </MenuItem>
-                    <MenuItem>
-                      <div className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] border border-[#D7D7D8] border-t-0  ">
-                        <ArchiveIcon/>
-                        Archived Chats
-                      </div>
-                    </MenuItem>
-                    <MenuItem>
-                      <div
-                        className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] hover:rounded-b-2xl    "
-                        onClick={() => setOpenDraft(true)}
-                      >
-                        <DraftMessagesIcon/>
-                        Drafts
-                      </div>
-                    </MenuItem>
-                  </div>
-                </MenuItems>
-              </Menu>
+                <Menu>
+                  <MenuButton>
+                    <FilterIcon />
+                  </MenuButton>
+                  <MenuItems anchor="bottom ">
+                    <div className=" bg-white w-[200px] flex flex-col justify-center rounded-3xl border border-[#D7D7D8] rounded-tr-[2px]  ">
+                      <MenuItem>
+                        <div
+                          className="flex  data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px]  hover:rounded-tl-2xl  "
+                          onClick={() => {
+                            setOpenDraft(false);
+                          }}
+                        >
+                          <AllChats />
+                          All Chats
+                        </div>
+                      </MenuItem>
+                      <MenuItem>
+                        <div className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] border border-[#D7D7D8] ">
+                          <UnreadMessageIcon />
+                          Unread Chats
+                        </div>
+                      </MenuItem>
+                      <MenuItem>
+                        <div className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] border border-[#D7D7D8] border-t-0  ">
+                          <ArchiveIcon />
+                          Archived Chats
+                        </div>
+                      </MenuItem>
+                      <MenuItem>
+                        <div
+                          className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] hover:rounded-b-2xl    "
+                          onClick={() => setOpenDraft(true)}
+                        >
+                          <DraftMessagesIcon />
+                          Drafts
+                        </div>
+                      </MenuItem>
+                    </div>
+                  </MenuItems>
+                </Menu>
               </div>
             </div>
             <div className="flex p-[24px] items-center gap-[16px] ">
               <div className="outline-none flex gap-[12px] border border-[#D7D7D8] py-[10px] px-[12px] bg-[#F2F3F5] rounded-xl">
-                <SearchIcon/>
-              <input
-                placeholder="Search users"
-                onChange={(e) => handleSearch(e.target.value)}
-                className="bg-[#F2F3F5]"
-              />
+                <SearchIcon />
+                <input
+                  placeholder="Search users"
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="bg-[#F2F3F5] outline-none "
+                />
               </div>
               <span
                 onClick={() => {
@@ -716,7 +769,7 @@ const Discussions = () => {
               </span>
               <span
                 onClick={() => setOpenDiscussionModal(true)}
-                className="cursor-pointer  bg-[#1660CD] text-[#FFFFFF] py-[12px] px-[20px] rounded-xl "
+                className="cursor-pointer whitespace-nowrap  bg-[#1660CD] text-[#FFFFFF] py-[12px] px-[20px] rounded-xl "
               >
                 New Room
               </span>
@@ -725,25 +778,46 @@ const Discussions = () => {
               {groups &&
                 !openDraft &&
                 groups.map((group, index) => {
-                  console.log(group, " Draft:1");
                   return (
                     <div key={index}>
                       <p
-                        className={` ${groupChatRoom?._id==group?._id && "bg-[#E8EFFA] "} cursor-pointer p-[12px] rounded-xl flex gap-[12px] `}
-                        onClick={() => { handleGroupOpen(group) }}
+                        className={` ${
+                          groupChatRoom?._id == group?._id && "bg-[#E8EFFA] "
+                        } cursor-pointer p-[12px] rounded-xl flex gap-[12px] `}
+                        onClick={() => {
+                          handleGroupOpen(group);
+                        }}
                       >
                         <img
                           src={group.groupAdmin.pic}
                           className=" w-[48px] h-[48px] rounded-full "
                         />
                         <div className=" w-full ">
-                          <div className=" flex justify-between w-full items-center " >
-                            <p className=" font-medium text-base ">{group.chatName}</p>
-                            <p className=" text-[#949497] text-[12px] leading-[18px] ">{getTimeAgo(group?.latestMessage?.createdAt)}</p>
+                          <div className=" flex justify-between w-full items-center ">
+                            <p className=" font-medium text-base ">
+                              {group.chatName}
+                            </p>
+                            <p className=" text-[#949497] text-[12px] leading-[18px] ">
+                              {getTimeAgo(group?.latestMessage?.createdAt)}
+                            </p>
                           </div>
                           <div className=" flex w-full justify-between ">
-                            <p>{draftMessages && draftMessages[group?._id] ? `Draft: ${ draftMessages[group?._id]?.draftMessage}` : group?.latestMessage?.content ?? "Start a converstion"}</p>
-                            <p className=" bg-[#1660CD] text-[10px] text-white rounded-lg py-[6px] px-[8px] max-h-[20px] max-w-[22px] flex items-center ">2</p>
+                            <p>
+                              {draftMessages && draftMessages[group?._id] ? (
+                                <p>
+                                  <span className=" text-[#1660CD] font-medium  ">
+                                    Draft:
+                                  </span>{" "}
+                                  {draftMessages[group?._id]?.draftMessage}
+                                </p>
+                              ) : (
+                                group?.latestMessage?.content?.length >25 ? group?.latestMessage?.content.substring(0,25)+`...` : group?.latestMessage?.content ??
+                                "Start a converstion"
+                              )}
+                            </p>
+                            <p className=" bg-[#1660CD] text-[10px] text-white rounded-lg py-[6px] px-[8px] max-h-[20px] max-w-[22px] flex items-center ">
+                              2
+                            </p>
                           </div>
                         </div>
                       </p>
@@ -752,7 +826,6 @@ const Discussions = () => {
                 })}
               {openDraft &&
                 Object.values(draftMessages).map((group, index) => {
-                  
                   return (
                     <div key={index}>
                       <p
@@ -769,9 +842,9 @@ const Discussions = () => {
                         <div>
                           <p>{group.groupChatRoom.chatName}</p>
                           <p>
-                            {draftMessages[group.groupChatRoom._id]
+                            {draftMessages[group.groupChatRoom?._id]
                               ? `Draft: ${
-                                  draftMessages[group.groupChatRoom._id]
+                                  draftMessages[group.groupChatRoom?._id]
                                     ?.draftMessage
                                 }`
                               : group.groupChatRoom.latestMessage?.content}
@@ -804,107 +877,121 @@ const Discussions = () => {
               })}
             </div>
           </div>
-        ) : (
-          groupChatRoom ? (
-            <div className="flex flex-col border border-[#D7D7D8] rounded-2xl relative bg-white w-full h-full ">
-              <div className="font-bold text-xl py-[16px] px-[24px] relative ">
-                {groupChatRoom?.chatName}
-
-                <div className=" absolute bg-red-500 -bottom-12 ">1</div>
-                <div className=" absolute bg-red-500 -bottom-12 ">1</div>
+        ) : groupChatRoom ? (
+          <div className="flex flex-col border border-[#D7D7D8] rounded-2xl relative bg-white w-full h-full ">
+            <div className="font-bold text-xl py-[16px] px-[24px] relative flex border-b border-[#D7D7D8] max-h-[80px] ">
+              <img
+                src={groupChatRoom.groupPic}
+                alt="Error"
+                className=" w-[48px] h-[48px] rounded-full "
+              />
+              <div>
+                <p>{groupChatRoom?.chatName}</p>
+                <p>{groupChatRoom?.users.length}</p>
               </div>
-              {pinnedMessages.map((message, index) => {
-                return (
-                  <div key={index} className="mb-2 bg-red-400">
-                    <p
-                      className=" bg-yellow-300 cursor-pointer "
-                      onClick={() => {
-                        handlePinMessage(message);
-                      }}
-                    >
-                      Unpin
-                    </p>
-                    {allowSelect && (
-                      <input
-                        type="checkbox"
-                        onClick={() =>
-                          setSelectMessage((prev) => {
-                            return [...prev, message];
-                          })
-                        }
-                      />
+            </div>
+            {pinnedMessages.map((message, index) => {
+              return (
+                <div key={index} className="mb-2 bg-red-400">
+                  <p
+                    className=" bg-yellow-300 cursor-pointer "
+                    onClick={() => {
+                      handlePinMessage(message);
+                    }}
+                  >
+                    Unpin
+                  </p>
+                  {allowSelect && (
+                    <input
+                      type="checkbox"
+                      onClick={() =>
+                        setSelectMessage((prev) => {
+                          return [...prev, message];
+                        })
+                      }
+                    />
+                  )}
+                  <p>
+                    <strong>Sender:</strong> {message.sender.username}
+                  </p>
+
+                  <div className=" flex gap-[24px]  ">
+                    {!message.isDeleted || !message.isDeletedForEveryOne ? (
+                      <p>{message.content}</p>
+                    ) : (
+                      <p>Message is deleted</p>
                     )}
-                    <p>
-                      <strong>Sender:</strong> {message.sender.username}
-                    </p>
 
-                    <div className=" flex gap-[24px]  ">
-                      {!message.isDeleted || !message.isDeletedForEveryOne ? (
-                        <p>{message.content}</p>
-                      ) : (
-                        <p>Message is deleted</p>
-                      )}
-
-                      {message.messageType == "application/pdf" && (
-                        <div>
-                          <p>{extractFileName(message.link)}</p>
-                          <a href={message.link}>PDF</a>
-                        </div>
-                      )}
-
+                    {message.messageType == "application/pdf" && (
                       <div>
-                        {message?.messageType == "image/png" &&
-                          message.link != null && (
-                            <img
-                              src={message.link}
-                              alt="Uploaded file"
-                              style={{ maxWidth: "100%", height: "auto" }}
-                            />
-                          )}
-
-                        {message?.messageType == "application/msword" &&
-                          message.link != null && (
-                            <div>
-                              <p>{extractFileName(message.link)}</p>
-                              <a href={message.link}>Word</a>
-                            </div>
-                          )}
-
-                        {message?.messageType == "application/vnd.ms-excel" &&
-                          message.link != null && (
-                            <div>
-                              <p>{extractFileName(message.link)}</p>
-                              <a href={message.link}>Word</a>
-                            </div>
-                          )}
-
-                        {message?.messageType ==
-                          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
-                          message.link != null && (
-                            <div>
-                              <p>{extractFileName(message.link)}</p>
-                              <a href={message.link}>Word</a>
-                            </div>
-                          )}
+                        <p>{extractFileName(message.link)}</p>
+                        <a href={message.link}>PDF</a>
                       </div>
+                    )}
+
+                    <div>
+                      {message?.messageType == "image/png" &&
+                        message.link != null && (
+                          <img
+                            src={message.link}
+                            alt="Uploaded file"
+                            style={{ maxWidth: "100%", height: "auto" }}
+                          />
+                        )}
+
+                      {message?.messageType == "application/msword" &&
+                        message.link != null && (
+                          <div>
+                            <p>{extractFileName(message.link)}</p>
+                            <a href={message.link}>Word</a>
+                          </div>
+                        )}
+
+                      {message?.messageType == "application/vnd.ms-excel" &&
+                        message.link != null && (
+                          <div>
+                            <p>{extractFileName(message.link)}</p>
+                            <a href={message.link}>Word</a>
+                          </div>
+                        )}
+
+                      {message?.messageType ==
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
+                        message.link != null && (
+                          <div>
+                            <p>{extractFileName(message.link)}</p>
+                            <a href={message.link}>Word</a>
+                          </div>
+                        )}
                     </div>
                   </div>
-                );
-              })}
-              <InfiniteScroll
-                dataLength={chatMessage?.length || 0}
-                next={fetchMoreChats}
-                hasMore={hasMoreData}
-                loader={<h4>Loading...</h4>}
-                scrollableTarget="scrollableDiv"
-                className=" bg-green-500 "
-                height={"50vh"}
-              >
+                </div>
+              );
+            })}
+            <InfiniteScroll
+              dataLength={chatMessage?.length || 0}
+              next={fetchMoreChats}
+              hasMore={hasMoreData}
+              loader={<h4>Loading...</h4>}
+              scrollableTarget="scrollableDiv"
+              className=" bg-white "
+              height={"70vh"}
+            >
+              <div id="scrollableDiv" className=" flex flex-col gap-[16px] ">
                 {chatMessage?.map((message, index) => {
-                  console.log(message.link, "File available at:");
                   return (
                     <>
-                      <div key={index} ref={(el) => (messageRef.current[index] = el)}  data-id={message._id} className="mb-2">
+                      <div
+                        key={index}
+                        ref={(el) => (messageRef.current[index] = el)}
+                        data-id={message?._id}
+                        className={` ${
+                          message.sender?._id == userId &&
+                          "bg-red-50 flex-row-reverse "
+                        }   mb-2 px-[24px] flex gap-[8px]  `}
+                        onMouseEnter={() => setOpenMenuIndex(index)}
+                        onMouseLeave={() => setOpenMenuIndex(null)}
+                      >
                         {allowSelect && (
                           <input
                             type="checkbox"
@@ -915,131 +1002,175 @@ const Discussions = () => {
                             }
                           />
                         )}
-                        <p>
-                          <strong>Sender:</strong> {message.sender?.username || JSON.parse(localStorage.getItem('user')).username}
+                        <div className=" flex ">
+                          <img
+                            src={
+                              message.sender?.pic ||
+                              JSON.parse(localStorage.getItem("user")).pic
+                            }
+                            alt=""
+                            className=" w-[32px] h-[32px] rounded-full "
+                          />
+                        </div>
 
-                        </p>
-
-                        <div className=" flex gap-[24px]  ">
-                          {!message.isDeleted ||
-                          !message.isDeletedForEveryOne ? (
-                            <p>{message.content}</p>
-                          ) : (
-                            <p>Message is deleted</p>
-                          )}
+                        <div
+                          className={` ${
+                            message.sender?._id == userId
+                              ? "bg-[#DAE6F7]  rounded-tr-[2px]  "
+                              : "bg-[#D7D7D8] rounded-tl-[2px]"
+                          } relative p-[8px] pb-[6px] rounded-xl max-w-xl`}
+                        >
+                            
+                              {!message.isDeleted ||
+                              !message.isDeletedForEveryOne ? (
+                                message?.replyTo && message?.replyMessage ? (
+                                  <div className="  w-full ">
+                                    <div className={`   ${message.sender?._id == userId ? "bg-[#EDF3FB] ": "bg-[#F2F3F5]"} w-full p-[8px] rounded-[8px]  `}>
+                                      <p className=" font-medium text-base text-[#949494] ">
+                                        {message?.sender.username}
+                                      </p>
+                                      <p className=" text-balance text-[#323236] ">
+                                        {message?.replyMessage?.content}
+                                      </p>
+                                    </div>
+                                    <p className="pr-[54px]  pt-[4px] px-[8px] pb-[6px]  ">
+                                    {message?.content}
+                                  </p>
+                                  </div>
+                                ) : (
+                                  <p className="pr-[54px] pt-[4px] px-[8px] pb-[6px]  ">
+                                    {message?.content}
+                                  </p>
+                                )
+                              ) : (
+                                <p>Message is deleted</p>
+                              )}
+                            
 
                           {message.messageType == "application/pdf" && (
-                            <div>
-                              <p>{extractFileName(message.link)}</p>
-                              <a href={message.link}>PDF</a>
+                            <div className={`${message.sender?._id == userId ? " ": ""} relative -top-2 flex flex-col gap-[4px] `}>
+                              <div className={` w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${message.sender?._id == userId ? "bg-[#EDF3FB] ": "bg-[#F2F3F5]"} `}><a  href={message.link}><DownloadIcon/></a></div>
+                              <p className=" relative top-1 flex gap-[6px] items-center "><PDFIcon/> {extractFileName(message.link)}</p>                              
                             </div>
                           )}
 
-                          <div>
-                            {message?.messageType == "image/png" &&
-                              message.link != null && (
-                                <img
-                                  src={message.link}
-                                  alt="Uploaded file"
-                                  style={{ maxWidth: "100%", height: "auto" }}
-                                />
-                              )}
+                          {message?.messageType == "image/png" &&
+                            message.link != null && (
+                              <img
+                                src={message.link}
+                                alt="Uploaded file"
+                                style={{ maxWidth: "100%", height: "auto" }}
+                                className=" pr-[8px] "
+                              />
+                            )}
 
-                            {message?.messageType == "application/msword" &&
-                              message.link != null && (
-                                <div>
-                                  <p>{extractFileName(message.link)}</p>
-                                  <a href={message.link}>Word</a>
-                                </div>
-                              )}
+                          {message?.messageType == "application/msword" &&
+                            message.link != null && (
+                              <div className={`${message.sender?._id == userId ? " ": ""} relative -top-2 flex flex-col gap-[4px] `}>
+                              <div className={` w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${message.sender?._id == userId ? "bg-[#EDF3FB] ": "bg-[#F2F3F5]"} `}><a  href={message.link}><DownloadIcon/></a></div>
+                              <p className=" relative top-1 flex gap-[6px] items-center "><ExcelIcon/> {extractFileName(message.link)}</p>                              
+                            </div>
+                            )}
 
-                            {message?.messageType ==
-                              "application/vnd.ms-excel" &&
-                              message.link != null && (
-                                <div>
-                                  <p>{extractFileName(message.link)}</p>
-                                  <a href={message.link}>Word</a>
-                                </div>
-                              )}
+                          {message?.messageType == "application/vnd.ms-excel" &&
+                            message.link != null && (
+                              <div className={`${message.sender?._id == userId ? " ": ""} relative -top-2 flex flex-col gap-[4px] `}>
+                              <div className={` w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${message.sender?._id == userId ? "bg-[#EDF3FB] ": "bg-[#F2F3F5]"} `}><a  href={message.link}><DownloadIcon/></a></div>
+                              <p className=" relative top-1 flex gap-[6px] items-center "><ExcelIcon/> {extractFileName(message.link)}</p>                              
+                            </div>
+                            )}
+      
+                          {message?.messageType ==
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
+                            message.link != null && (
+                              <div>
+                                <p>{extractFileName(message.link)}</p>
+                                <a href={message.link}>Word</a>
+                              </div>
+                            )}
 
-                            {message?.messageType ==
-                              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" &&
-                              message.link != null && (
-                                <div>
-                                  <p>{extractFileName(message.link)}</p>
-                                  <a href={message.link}>Word</a>
-                                </div>
-                              )}
-
-                            <p>
-                            <ReadIcon iconColor={ message?.isReadByAll.length === groupChatRoom.users.length ? "#1600D0" : "#57585C" }/>
-                            </p>
-                          </div>
-
+                          <p className=" absolute bottom-0 right-1 flex pl-[8px] gap-[4px] items-center ">
+                            <span className=" text-[10px] leading-[15px] whitespace-nowrap ">
+                              {formatTime(message.createdAt)}
+                            </span>
+                            <ReadIcon
+                              iconColor={
+                                message?.isReadByAll.length ===
+                                groupChatRoom.users.length
+                                  ? "#1600D0"
+                                  : "#57585C"
+                              }
+                            />
+                          </p>
+                        </div>
+                        {openMenuIndex == index && (
                           <Menu>
                             <MenuButton>
                               <DownArrow />
                             </MenuButton>
-                            <MenuItems anchor="bottom">
-                              <div className=" bg-white ">
+                            <MenuItems anchor="bottom right">
+                              <div className=" bg-white w-[200px] border border-[#D7D7D8] rounded-3xl rounded-tl-[2px]  ">
                                 <MenuItem>
                                   <p
-                                    className="block data-[focus]:bg-blue-100"
+                                    className="flex gap-[12px] data-[focus]:bg-blue-100 hover:rounded-tr-3xl pt-[12px] pr-[24px] pb-[12px] pl-[16px] border-b border-[#D7D7D8] "
                                     onClick={() => {
                                       setReplyTo(message.sender?._id);
-                                      setReplyToUserName(
-                                        message.sender.username
-                                      );
+                                      setReplyMessage(message);
                                     }}
                                   >
-                                    Reply To
+                                    <AllChats /> Reply
+                                  </p>
+                                </MenuItem>
+                                <MenuItem>
+                                  <p className="flex gap-[12px] data-[focus]:bg-blue-100  pt-[12px] pr-[24px] pb-[12px] pl-[16px] border-b border-[#D7D7D8] ">
+                                    <CopyIcon /> Copy
                                   </p>
                                 </MenuItem>
                                 <MenuItem>
                                   <p
-                                    className="block data-[focus]:bg-blue-100"
+                                    className="flex gap-[12px] data-[focus]:bg-blue-100  pt-[12px] pr-[24px] pb-[12px] pl-[16px] border-b border-[#D7D7D8] "
                                     onClick={() => {
                                       handleStarMessage(message, false);
                                     }}
                                   >
-                                    Star
+                                    <StarMessageIcon /> Star
                                   </p>
                                 </MenuItem>
                                 <MenuItem>
                                   <p
-                                    className="block data-[focus]:bg-blue-100"
+                                    className="flex gap-[12px] data-[focus]:bg-blue-100  pt-[12px] pr-[24px] pb-[12px] pl-[16px] border-b border-[#D7D7D8] "
                                     onClick={() => {
                                       handlePinMessage(message);
                                     }}
                                   >
-                                    Pin
+                                    <PinIcon /> Pin
                                   </p>
                                 </MenuItem>
                                 <MenuItem>
                                   <p
-                                    className="block data-[focus]:bg-blue-100"
+                                    className="flex gap-[12px] data-[focus]:bg-blue-100  pt-[12px] pr-[24px] pb-[12px] pl-[16px] border-b border-[#D7D7D8] "
                                     onClick={() => {
                                       setOpenDeleteModal(true);
                                       setSelectedMessage(message);
                                     }}
                                   >
-                                    Delete
+                                    <TrashIcon /> Delete
                                   </p>
                                 </MenuItem>
                                 <MenuItem>
                                   <p
-                                    className="block data-[focus]:bg-blue-100"
+                                    className="flex gap-[12px] data-[focus]:bg-blue-100  pt-[12px] pr-[24px] pb-[12px] pl-[16px] border-b border-[#D7D7D8] "
                                     onClick={() => {
                                       setEditMessage(message);
                                       setNewMessage(message.content);
                                     }}
                                   >
-                                    Edit
+                                    <DraftMessagesIcon /> Edit
                                   </p>
                                 </MenuItem>
                                 <MenuItem>
                                   <p
-                                    className="block data-[focus]:bg-blue-100"
+                                    className="flex gap-[12px] data-[focus]:bg-blue-100  pt-[12px] pr-[24px] pb-[12px] pl-[16px] border-b border-[#D7D7D8] "
                                     onClick={() => {
                                       setAllowSelect(true);
                                       setSelectMessage((prev) => {
@@ -1047,89 +1178,110 @@ const Discussions = () => {
                                       });
                                     }}
                                   >
-                                    Select
+                                    <SelectIcon /> Select
                                   </p>
                                 </MenuItem>
                                 <MenuItem>
                                   <p
-                                    className="block data-[focus]:bg-blue-100"
+                                    className="flex gap-[12px] data-[focus]:bg-blue-100 hover:rounded-b-3xl pt-[12px] pr-[24px] pb-[12px] pl-[16px]  "
                                     onClick={() => {
                                       setForward(true);
                                     }}
                                   >
-                                    Forward
+                                    <ForwardIcon /> Forward
                                   </p>
                                 </MenuItem>
                               </div>
                             </MenuItems>
                           </Menu>
-                        </div>
+                        )}
                       </div>
                     </>
                   );
                 })}
-              </InfiniteScroll>
-              <div className="absolute bottom-0 flex flex-col w-full p-2 bg-white border-t border-gray-300">
-                {replyToUsername != null && (
-                  <p>replying to {replyToUsername}</p>
-                )}
-                {allowSelect && (
-                  <div className=" flex ">
-                    <p>Star</p>
-                    <p>Copy</p>
-                    <p>Forward</p>
-                    <p>Delete</p>
-                    <button>cancel</button>
+              </div>
+            </InfiniteScroll>
+            <div className=" flex flex-col gap-[8px] absolute bottom-0 w-full py-[16px] px-[24px] bg-white border-t border-gray-300 rounded-b-2xl ">
+              {replyMessage != null && (
+                <div className=" flex justify-between w-full bg-[#D7D7D8] p-[8px] rounded-lg text-[#949497] ">
+                  <div className="  ">
+                    <p>{replyMessage?.sender.username}</p>
+                    <p className=" text-[#323236] ">{replyMessage.content}</p>
                   </div>
-                )}
-                {file && <p>{file[0]?.name}</p>}
-                <label htmlFor="filePicker" className="cursor-pointer">
-                  <PaperClip />
-                </label>
-                <div
-                  onClick={() => {
-                    setOpenEmoji(!openEmoji);
-                  }}
-                >
-                  <p><EmojiIcon/></p>
-                  {openEmoji && (
-                    <EmojiPicker
-                      onEmojiClick={(emojiObject, event) => {
-                        handleMessageChange(
-                          false,
-                          emojiObject.emoji,
-                          groupChatRoom
-                        );
-                      }}
-                      open={openEmoji}
-                    />
-                  )}
+                  <span
+                    onClick={() => setReplyMessage(null)}
+                    className=" cursor-pointer "
+                  >
+                    <CloseIcon />
+                  </span>
                 </div>
-                <input
-                  id="filePicker"
-                  type="file"
-                  accept=".pdf, .jpeg, .jpg, .png, .gif, .doc, .docx, .txt, .xls, .xlsx, .csv"
-                  className="hidden" // Hide the file input element
-                  onChange={(e) => handleFileUpload(e.target.files)} // Handle file upload
-                />
-                <input
-                  className="outline-none border border-red-300 w-full p-2 rounded-md"
-                  value={newMessage}
-                  onChange={(e) => handleMessageChange(e, false, groupChatRoom)}
-                  placeholder="Type a message"
-                />
+              )}
+              {allowSelect && (
+                <div className=" flex ">
+                  <p>Star</p>
+                  <p>Copy</p>
+                  <p>Forward</p>
+                  <p>Delete</p>
+                  <button>cancel</button>
+                </div>
+              )}
+              {file && <p>{file[0]?.name}</p>}
+
+              <div className=" flex ">
+                <div className=" w-full flex border border-[#D7D7D8] rounded-xl px-[16px] items-center">
+                  <input
+                    id="filePicker"
+                    type="file"
+                    accept=".pdf, .jpeg, .jpg, .png, .gif, .doc, .docx, .txt, .xls, .xlsx, .csv"
+                    className="hidden" // Hide the file input element
+                    onChange={(e) => handleFileUpload(e.target.files)} // Handle file upload
+                  />
+                  <input
+                    className="outline-none w-full p-2 rounded-2xl"
+                    value={newMessage}
+                    onChange={(e) =>
+                      handleMessageChange(e, false, groupChatRoom)
+                    }
+                    placeholder="Type a message"
+                  />
+                  <label htmlFor="filePicker" className="cursor-pointer">
+                    <PaperClip />
+                  </label>
+                  <div
+                    onClick={() => {
+                      setOpenEmoji(!openEmoji);
+                    }}
+                  >
+                    <p>
+                      <EmojiIcon />
+                    </p>
+                    {openEmoji && (
+                      <EmojiPicker
+                        onEmojiClick={(emojiObject, event) => {
+                          handleMessageChange(
+                            false,
+                            emojiObject.emoji,
+                            groupChatRoom
+                          );
+                        }}
+                        open={openEmoji}
+                      />
+                    )}
+                  </div>
+                </div>
                 <button
                   onClick={sendMessage}
-                  className="ml-2 bg-blue-500 text-white p-2 rounded-md"
+                  className="ml-2 text-white p-2 rounded-md"
                 >
-                  Send
+                  <SendIcon />
                 </button>
               </div>
-            
+            </div>
           </div>
-          ):(
-            <div>Select a room</div>
-          )
+        ) : (
+          <div className=" w-full h-full bg-white rounded-3xl border border-[#D7D7D8] flex justify-center items-center ">
+            Select a room
+          </div>
         )}
       </div>
 
@@ -1147,6 +1299,15 @@ const Discussions = () => {
               </DialogTitle>
               <div className="mt-2">
                 <form onSubmit={createDiscussionRoom}>
+                  <div>
+                    <input
+                      type="file"
+                      accept=".jpeg, .jpg, .png"
+                      onChange={(e) => {
+                        handleGroupImage(e.target.files);
+                      }}
+                    />
+                  </div>
                   <div className="mb-4">
                     <label className="block text-gray-700">
                       Enter Group Name
@@ -1154,6 +1315,17 @@ const Discussions = () => {
                     <input
                       value={groupName}
                       onChange={(e) => setGroupName(e.target.value)}
+                      className="outline-none border border-gray-300 p-2 rounded-md w-full"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">
+                      Enter Group Description
+                    </label>
+                    <input
+                      value={groupDescription}
+                      onChange={(e) => setGroupDescription(e.target.value)}
                       className="outline-none border border-gray-300 p-2 rounded-md w-full"
                       required
                     />
@@ -1220,7 +1392,7 @@ const Discussions = () => {
                 <Description>
                   This will permanently dalate your message
                 </Description>
-                <div className=" border-t border-[#5758C] flex gap-[24px] ">
+                <div className=" border-t border-[#57585C] flex gap-[24px] ">
                   <button onClick={() => handleDelete("delete")}>
                     Delete for Me
                   </button>
@@ -1269,11 +1441,15 @@ const Discussions = () => {
                               <div>
                                 <p>{group.chatName}</p>
                                 <p>
-                                  {draftMessages && draftMessages[group?._id]
-                                    ? `Draft: ${
-                                        draftMessages[group?._id]?.draftMessage
-                                      }`
-                                    : group?.latestMessage?.content}
+                                  {draftMessages &&
+                                  draftMessages[group?._id] ? (
+                                    <p>
+                                      Draft:{" "}
+                                      {draftMessages[group?._id]?.draftMessage}
+                                    </p>
+                                  ) : (
+                                    group?.latestMessage?.content
+                                  )}
                                 </p>
                               </div>
                             </p>
@@ -1282,11 +1458,6 @@ const Discussions = () => {
                       })}
                     {openDraft &&
                       Object.values(draftMessages).map((group, index) => {
-                        console.log(
-                          group.groupChatRoom?._id,
-                          draftMessages,
-                          " Draft:"
-                        );
                         return (
                           <div key={index}>
                             <p

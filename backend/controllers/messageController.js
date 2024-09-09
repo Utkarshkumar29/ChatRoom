@@ -5,7 +5,7 @@ const Chat = require("../Models/chatModal");
 const User = require("../Models/userSchema");
 
 const sendMessage = asyncHandler(async (req, res) => {
-  const { content, chatId, link, messageType, replyTo } = req.body;
+  const { content, chatId, link, messageType, replyTo,replyMessage } = req.body;
 
   var newMessage = {
     sender: req.user._id,
@@ -16,14 +16,14 @@ const sendMessage = asyncHandler(async (req, res) => {
     replyTo: replyTo,
     isDeleted: false,
     isDeletedForEveryOne: false,
-    
+    replyMessage:replyMessage,
     isPinned: false,
     isStarred: [],
   };
 
   try {
     var message = await Message.create(newMessage);
-
+    message = await message.populate("replyMessage", "content sender");
     message = await message.populate("sender", "name pic");
     message = await message.populate("chat");
     message = await User.populate(message, {
@@ -47,6 +47,7 @@ const allMessage = asyncHandler(async (req, res) => {
     const messages = await Message.find({ chat: chatId })
       .populate("replyTo", "username pic email")
       .populate("sender", "username pic email")
+      .populate("replyMessage", "content")
       .populate("chat")
       .skip((page - 1) * limit)
       .limit(parseInt(limit));

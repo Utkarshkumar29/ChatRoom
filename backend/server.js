@@ -67,8 +67,8 @@ io.on("connection", (socket) => {
     socket.on("setup", (userData) => {
         if (userData && userData._id) {
             socket.join(userData._id);
-            console.log(`User ${userData._id} joined room.`);
             socket.emit("connected");
+            console.log(`User ${userData._id} joined room.`);
         }
     });
 

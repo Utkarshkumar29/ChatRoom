@@ -21,6 +21,12 @@ const ChatSchema = new mongoose.Schema(
     unSeenMessage: {
       type: Number,
     },
+    groupPic:{
+      type:String
+    },
+    description:{
+      type:String
+    }
   },
   {
     timestamps: true,
