@@ -3,6 +3,8 @@ const asyncHandler=require('express-async-handler')
 const Chat=require('../Models/chatModal')
 const User=require('../Models/userSchema')
 const express = require('express');
+const Message = require('../Models/messageModal');
+
 const app = express();
 
 app.use(express.json());
@@ -183,5 +185,7 @@ const removeFromGroup=asyncHandler(async(req,res)=>{
     console.log(error)
   }
 })
+
+
 
 module.exports={accessChat,fetchChats,createGroupChat,renameGroupChat,addToGroup,removeFromGroup}

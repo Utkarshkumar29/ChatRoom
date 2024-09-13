@@ -4,9 +4,7 @@
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: Poppins;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -14,4 +12,43 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+input[type="checkbox"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: #fff; 
+  margin-right: 10px;
+  font: inherit;
+  color: currentColor;
+  width: 18px;
+  height: 18px;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  display: grid;
+  place-content: center;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+input[type="checkbox"]::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 20%, 85% 0%, 50% 75%);
+  transform: scale(0);
+  transform-origin: bottom left;
+  transition: transform 0.2s ease-in-out;
+}
+
+input[type="checkbox"]:checked {
+  background-color: #1660CD;
+  border-color: #1660CD;
+}
+
+input[type="checkbox"]:checked::before {
+  transform: scale(1);
+  background-color: white;
 }

@@ -9,7 +9,9 @@ const {
   getAllPinnedMessage,
   getStarredMessage,
   editMessage,
-  markAsSeen
+  markAsSeen,
+  groupMedia,
+  groupDocument
 } = require('../controllers/messageController');
 
 const router = express.Router();
@@ -30,5 +32,8 @@ router.route('/pinnedmessages/:chatId').get(protect, getAllPinnedMessage);
 
 // All messages route - make sure this is at the end
 router.route('/:chatId').get(protect, allMessage);
+
+router.route('/groupMedia/:chatId').get(protect, groupMedia);
+router.route('/groupDocument/:chatId').get(protect, groupDocument);
 
 module.exports = router;

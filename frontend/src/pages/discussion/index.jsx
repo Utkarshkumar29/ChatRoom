@@ -53,6 +53,9 @@ import MediaIcon from "../../assets/icons/MediaIcon";
 import DocumentIcon from "../../assets/icons/DocumentIcon";
 import MemberIcon from "../../assets/icons/MemberIcon";
 import PencilIcon from "../../assets/icons/PencilIcon";
+import CrossIcon from "../../assets/icons/CrossIcon";
+import AlertIcon from "../../assets/icons/AlertIcon";
+import DoctIcon from "../../assets/icons/DoctIcon";
 
 
 const Discussions = () => {
@@ -88,9 +91,53 @@ const Discussions = () => {
   const [openGroupMenu,setOpenGroupMenu]=useState(false)
   const [selectedMenu,setSelectedMenu]=useState("about")
   const [enabled, setEnabled] = useState(false)
+  const [openExitRoomModal,setExitRoomModal]=useState(false)
+  const [openReportRoomModal,setReportRoomModal]=useState(false)
+  const [groupMedia,setGroupMedia]=useState([])
+  const [groupDocument,setGroupDocument]=useState([])
+
+  const ReasonsToReport=[
+    "Hate speech or symbols",
+    "Scam or Fraud",
+    "Nudity or sexual activity",
+    "Violence or dangerous organisations",
+    "Sale of illegal or regulated goods",
+    "Bullying or harassment",
+    "Intellectual property violation",
+    "Suicide or self injury",
+    "Spam",
+    "Reason not listed"
+  ]
+
+  const fetchGroupMedia=async()=>{
+    try {
+      const response=await axios.get(`api/message/groupMedia/${groupChatRoom._id}`)
+      setGroupMedia(response.data)
+    } catch (error) {
+        console.log(error)
+    }
+  }
+
+  const fetchGroupDocument=async()=>{
+    try {
+      const response=await axios.get(`api/message/groupDocument/${groupChatRoom._id}`)
+      setGroupDocument(response.data)
+      console.log(response.data,'trying')
+    } catch (error) {
+        console.log(error)
+    }
+  }
 
   const handleSelectedMenu=(section)=>{
     setSelectedMenu(section)
+
+    if(section=="media"){
+      fetchGroupMedia()
+    }
+
+    if(section=="document"){
+      fetchGroupDocument()
+    }
   }
 
   const userId = JSON.parse(localStorage.getItem("user"))._id;
@@ -619,6 +666,10 @@ const Discussions = () => {
   const messageRef = useRef([]);
   const seenMessages = useRef(new Set());
 
+  useEffect(()=>{
+    console.log("trying",groupChatRoom?.users)
+  },[groupChatRoom])
+
   useEffect(() => {
     const observer = new IntersectionObserver((enteries) => {
       enteries.forEach((entry) => {
@@ -811,7 +862,7 @@ const Discussions = () => {
                         <div className=" w-full ">
                           <div className=" flex justify-between w-full items-center ">
                             <p className=" font-medium text-base ">
-                              {group.chatName}
+                              {group?.chatName}
                             </p>
                             <p className=" text-[#949497] text-[12px] leading-[18px] ">
                               {getTimeAgo(group?.latestMessage?.createdAt)}
@@ -856,7 +907,7 @@ const Discussions = () => {
                           className="w-[48px] h-[48px] rounded-full"
                         />
                         <div>
-                          <p>{group.groupChatRoom.chatName}</p>
+                          <p>{group?.groupChatRoom.chatName}</p>
                           <p>
                             {draftMessages[group.groupChatRoom?._id]
                               ? `Draft: ${
@@ -999,20 +1050,20 @@ const Discussions = () => {
                     <>
                     {openGroupMenu && (
                       <div className=" absolute z-10 bg-[#16171C7A] h-[71vh] w-full flex p-[32px] gap-[24px] justify-center  ">
-                        <div className="w-full max-w-[300px] bg-white flex-col flex rounded-2xl h-[210px] p-[8px]">
+                        <div className="w-full max-w-[300px] h-min bg-white flex-col flex rounded-2xl p-[8px]">
                           <p onClick={()=>handleSelectedMenu("about")} className={` ${selectedMenu=="about" && " bg-[#E8EFFA] "} rounded-xl flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px]  `}><InfoSquare/>About</p>
                           <p onClick={()=>handleSelectedMenu("media")} className={` ${selectedMenu=="media" && " bg-[#E8EFFA] "} rounded-xl  flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}><MediaIcon/>Media</p>
                           <p onClick={()=>handleSelectedMenu("document")} className={` ${selectedMenu=="document" && " bg-[#E8EFFA] "} rounded-xl  flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}><DocumentIcon/>Documents</p>
                           <p onClick={()=>handleSelectedMenu("members")} className={` ${selectedMenu=="members" && " bg-[#E8EFFA] "} rounded-xl flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}><MemberIcon/>Members</p>
                         </div>
-                        <div className=" max-w-[550px] bg-white w-full rounded-2xl ">
+                        <div className=" max-w-[550px] h-min bg-white w-full rounded-2xl ">
                             {selectedMenu=="about" && (
-                              <div>
+                              <div className=" ">
                                 <p className=" py-[16px] px-[24px] font-semibold text-[18px] leading-[27px] border-b border-[#D7D7D8] ">About {groupChatRoom?.chatName} </p>
                                 <div className=" flex gap-[24px] py-[16px] px-[24px] border-b border-[#D7D7D8] ">
                                   <img src={groupChatRoom.groupPic} alt="Error" className=" w-[96px] h-[96px] rounded-full " />
                                   <div className=" flex flex-col justify-center ">
-                                    <p className=" flex w-[164px] justify-between font-medium text-[#16171C] ">{groupChatRoom.chatName} <PencilIcon/></p>
+                                    <p className=" flex w-[164px] justify-between font-medium text-[#16171C] ">{groupChatRoom?.chatName} <PencilIcon/></p>
                                     <p className=" text-[#57585C] ">{groupChatRoom.users.length} Members</p>
                                   </div>                                  
                                 </div>
@@ -1023,12 +1074,12 @@ const Discussions = () => {
                                   </div>
                                   <p className=" text-[16px] leading-[22px] ">{groupChatRoom.description}</p>
                                 </div>
-                                <div className=" p-[16px] pl-[24px] ">
+                                <div className=" p-[16px] pl-[24px] border-b border-[#D7D7D8]  ">
                                     <p className=" font-semibold ">Created</p>
                                     <p className=" text-base leading-[22px] ">Room Created by <span className=" font-medium ">{JSON.parse(localStorage.getItem('user')).username==groupChatRoom.groupAdmin.username ? "You": groupChatRoom.groupAdmin.username }</span>, on {new Date(groupChatRoom.createdAt).toLocaleDateString('en-GB', {day: 'numeric',month: 'long',year: 'numeric',})} </p>
                                 </div>
-                                <div>
-                                  <p>Mute Notification</p>
+                                <div className=" flex justify-between py-[16px] px-[24px] border-b border-[#D7D7D8]  ">
+                                  <p className=" font-semibold ">Mute Notification</p>
                                   <Switch
                                       checked={enabled}
                                       onChange={setEnabled}
@@ -1036,22 +1087,66 @@ const Discussions = () => {
                                     >
                                       <span className="size-4 translate-x-1 rounded-full bg-white transition group-data-[checked]:translate-x-6" />
                                     </Switch>
-                                </div>  
+                                </div>
+                                <div className=" py-[16px] px-[32px] flex gap-[16px] justify-center ">
+                                    <button onClick={()=>setExitRoomModal(true)} className=" cursor-pointer w-[220px] text-[#57585C] border border-[#57585C] py-[12px] px-[40px] rounded-2xl flex justify-center ">
+                                      Exit Room
+                                    </button>
+                                    <button onClick={()=>setReportRoomModal(true)} className=" cursor-pointer w-[220px] text-[#FA1111] border border-[#FA1111] py-[12px] px-[40px] rounded-2xl flex justify-center ">
+                                      Report Room
+                                    </button>
+                                </div>
                               </div>
                             )}
                             {selectedMenu=="media" && (
                               <div>
-                                About {groupChatRoom?.chatName} 
+                                <p className=" py-[16px] px-[24px] font-semibold text-[18px] leading-[27px] border-b border-[#D7D7D8] ">Media</p>
+                                <div className=" flex flex-wrap p-[16px] gap-[16px] ">
+                                  {groupMedia.map((image,index)=>{
+                                    return(
+                                      <div className="">
+                                      <img src={image.link} alt="Error" className=" w-[90px] h-[90px]"/>
+                                    </div>
+                                    )
+                                  })}
+                                </div>
                               </div>
                             )}
                             {selectedMenu=="document" && (
                               <div>
-                                About {groupChatRoom?.chatName} 
+                                <p className=" py-[16px] px-[24px] font-semibold text-[18px] leading-[27px] border-b border-[#D7D7D8] ">Documents</p>
+                                <div className=" flex flex-col p-[16px] gap-[16px] ">
+                                {groupDocument.map((doc,index)=>{
+                                  console.log(doc.link,'trying')
+                                    return(
+                                      <div className=" flex gap-[16px] ">
+                                        <a  href={doc.link}><DoctIcon/></a>
+                                        <p className=" relative top-1 flex gap-[6px] items-center ">{extractFileName(doc.link)}</p>  
+                                      </div>
+                                    )
+                                  })}
+                                  </div>
                               </div>
                             )}
                             {selectedMenu=="members" && (
                               <div>
-                                About {groupChatRoom?.chatName} 
+                                <div className=" py-[16px] px-[24px]  border-b border-[#D7D7D8] flex justify-between ">
+                                <p className="font-semibold text-[18px] leading-[27px]" >Members</p>
+                                <p className=" bg-[#949494] text-white flex justify-center items-center p-[9px] rounded-xl max-h-[25px] max-w-[25px] ">{groupChatRoom?.users.length}</p>
+                                </div>
+                                <div className=" flex flex-col p-[16px] gap-[16px] h-min ">
+                                  {groupChatRoom?.users.map((user,index)=>{
+                                    return(
+                                      <div className=" flex gap-[16px] items-center ">
+                                        <img src={user.pic} className=" w-[48px] h-[48px] rounded-full " />
+                                        <div>
+                                          <p>{user.username}</p>
+                                          <p className=" border border-[#1660CD] flex justify-center items-center text-[#1660CD] rounded-lg py-[8px] px-[16px] max-h-[30px] font-medium text-[12px] leading-[18px] ">{groupChatRoom?.groupAdmin.username==user?.username ? "Admin":"Member"}</p>
+                                        </div>
+                                      </div>
+                                    )
+                                  })}
+                                </div>
                               </div>
                             )}
                         </div>
@@ -1365,7 +1460,7 @@ const Discussions = () => {
       <Transition appear show={openDiscussionModal} as={Fragment}>
         <Dialog
           as="div"
-          className="fixed inset-0 z-30 overflow-y-auto"
+          className="fixed inset-0 z-30 overflow-y-auto bg-[#16171C] bg-opacity-[48%]"
           onClose={() => setOpenDiscussionModal(false)}
         >
           <div className="flex min-h-screen items-center justify-center p-4 text-center">
@@ -1456,7 +1551,7 @@ const Discussions = () => {
       <Transition appear show={openDeleteModal} as={Fragment}>
         <Dialog
           as="div"
-          className="fixed inset-0 z-30 overflow-y-auto"
+          className="fixed inset-0 z-30 overflow-y-auto bg-[#16171C] bg-opacity-[48%]"
           onClose={() => setOpenDeleteModal(false)}
         >
           <div className="flex min-h-screen items-center justify-center p-4 text-center">
@@ -1487,7 +1582,7 @@ const Discussions = () => {
       <Transition appear show={forward} as={Fragment}>
         <Dialog
           as="div"
-          className="fixed inset-0 z-30 overflow-y-auto"
+          className="fixed inset-0 z-30 overflow-y-auto bg-[#16171C] bg-opacity-[48%]"
           onClose={() => setOpenDeleteModal(false)}
         >
           <div className="flex min-h-screen items-center justify-center p-4 text-center">
@@ -1515,7 +1610,7 @@ const Discussions = () => {
                                 className=" w-[48px] h-[48px] rounded-full "
                               />
                               <div>
-                                <p>{group.chatName}</p>
+                                <p>{group?.chatName}</p>
                                 <p>
                                   {draftMessages &&
                                   draftMessages[group?._id] ? (
@@ -1548,7 +1643,7 @@ const Discussions = () => {
                                 className="w-[48px] h-[48px] rounded-full"
                               />
                               <div>
-                                <p>{group.groupChatRoom.chatName}</p>
+                                <p>{group?.groupChatRoom?.chatName}</p>
                                 <p>
                                   {draftMessages[group.groupChatRoom._id]
                                     ? `Draft: ${
@@ -1570,6 +1665,83 @@ const Discussions = () => {
                   {selectedMessage?.sender?._id != user?._id && (
                     <button onClick={false}>Forward</button>
                   )}
+                </div>
+              </div>
+            </DialogPanel>
+          </div>
+        </Dialog>
+      </Transition>
+
+      <Transition appear show={openExitRoomModal} as={Fragment}>
+        <Dialog
+          as="div"
+          className="fixed inset-0 z-30 overflow-y-auto bg-[#16171C] bg-opacity-[48%] "
+          onClose={() => setExitRoomModal(false)}
+        >
+          <div className="flex min-h-screen items-center justify-center text-center">
+            <DialogPanel className="w-full max-w-[414px] transform overflow-hidden rounded-3xl bg-white text-left align-middle shadow-xl transition-all">
+              <DialogTitle as="h3" className="text-lg font-bold">
+                <div className=" flex justify-between py-[24px] px-[32px] ">
+                <p>Exit Room</p>
+                <span onClick={()=>setExitRoomModal(false)}><CrossIcon/></span>
+                </div>
+              </DialogTitle>
+              <div className="">
+                <Description>
+                  <div className=" p-[32px] flex justify-center items-center text-center flex-col gap-[16px] border-y border-[#D7D7D8]  ">
+                  <AlertIcon/>
+                  <p className=" font-medium ">Are you sure<br/> want to exit “{groupChatRoom?.chatName}” room ?</p>
+                  </div>
+                </Description>
+                <div className=" justify-center flex gap-[24px] py-[16px] px-[32px] ">
+                <button className=" bg-[#FA1111] text-white py-[12px] px-[40px] rounded-2xl max-w-[131px] w-full max-h-[44px] flex justify-center items-center ">
+                    Exit
+                  </button>
+                  <button onClick={()=>setExitRoomModal(false)} className=" border border-[#1660CD] text-[#1660CD] py-[12px] px-[40px] rounded-2xl max-w-[131px] max-h-[44px] flex justify-center items-center ">
+                  Cancel 
+                  </button>
+                </div>
+              </div>
+            </DialogPanel>
+          </div>
+        </Dialog>
+      </Transition>
+
+      <Transition appear show={openReportRoomModal} as={Fragment}>
+        <Dialog
+          as="div"
+          className="fixed inset-0 z-40 overflow-y-aut0 bg-[#16171C] bg-opacity-[48%] "
+          onClose={()=>{setReportRoomModal(false)}}
+        >
+          <div className="flex min-h-screen items-center justify-center text-center">
+            <DialogPanel className="w-full max-w-[560px] transform overflow-hidden rounded-3xl bg-white text-left align-middle shadow-xl transition-all">
+              <DialogTitle as="h3" className="text-lg font-bold">
+                <div className=" flex justify-between py-[24px] px-[32px] ">
+                <p>Report Room</p>
+                <span onClick={()=>setExitRoomModal(false)}><CrossIcon/></span>
+                </div>
+              </DialogTitle>
+              <div className="">
+                <Description>
+                  <div className=" p-[32px] flex justify-center flex-col gap-[16px] border-y border-[#D7D7D8]  ">
+                  <p className=" text-[#16171C] font-semibold ">Select Reason</p>
+                  <div className=" flex gap-[12px] flex-col ">
+                  {ReasonsToReport.map((reason, index) => (
+                      <label key={index} className=" flex items-center text-[#57585C] ">
+                        <input required type="checkbox" />
+                        {reason}
+                      </label>
+                    ))}
+                  </div>
+                  </div>
+                </Description>
+                <div className=" justify-center flex gap-[24px] py-[16px] px-[32px] ">
+                <button className=" bg-[#FA1111] text-white py-[12px] px-[40px] rounded-xl max-w-[186px] whitespace-nowrap w-full max-h-[44px] flex justify-center items-center ">
+                  Report and Exit
+                  </button>
+                  <button onClick={()=>setExitRoomModal(false)} className=" border border-[#1660CD] text-[#1660CD] py-[12px] px-[40px] rounded-xl max-w-[131px] max-h-[44px] flex justify-center items-center ">
+                  Cancel 
+                  </button>
                 </div>
               </div>
             </DialogPanel>

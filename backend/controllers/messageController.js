@@ -212,4 +212,32 @@ const markAsSeen=asyncHandler(async(req,res)=>{
   }
 })
 
-module.exports = { sendMessage, allMessage, deleteMessage, starMessage, pinMessage, getAllPinnedMessage, getStarredMessage, editMessage, markAsSeen };
+const groupMedia = asyncHandler(async (req, res) => {
+  const { chatId } = req.params;
+  try {
+    const messages = await Message.find({
+      chat: chatId,
+      messageType: {$in: ["image/jpeg", "image/png"]}
+  })
+  .sort({ createdAt: -1 });
+    res.status(200).send(messages)
+  } catch (error) {
+      console.log(error)
+  }
+});
+
+const groupDocument = asyncHandler(async (req, res) => {
+  const { chatId } = req.params;
+  try {
+    const messages = await Message.find({
+      chat: chatId,
+      messageType: {$nin: ["image/jpeg", "image/png", "text"]}
+  })
+  .sort({ createdAt: -1 });
+    res.status(200).send(messages)
+  } catch (error) {
+      console.log(error)
+  }
+});
+
+module.exports = { sendMessage, allMessage, deleteMessage, starMessage, pinMessage, getAllPinnedMessage, getStarredMessage, editMessage, markAsSeen,groupMedia,groupDocument };
