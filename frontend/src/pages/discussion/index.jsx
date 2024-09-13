@@ -10,6 +10,7 @@ import {
   MenuButton,
   MenuItem,
   MenuItems,
+  Switch,
   Transition,
 } from "@headlessui/react";
 import axios from "axios";
@@ -47,6 +48,12 @@ import CloseIcon from "../../assets/icons/CloseIcon";
 import DownloadIcon from "../../assets/icons/DownloadIcon";
 import PDFIcon from "../../assets/icons/PDFIcon"
 import ExcelIcon from "../../assets/icons/ExcelIcon";
+import InfoSquare from "../../assets/icons/InfoSquare";
+import MediaIcon from "../../assets/icons/MediaIcon";
+import DocumentIcon from "../../assets/icons/DocumentIcon";
+import MemberIcon from "../../assets/icons/MemberIcon";
+import PencilIcon from "../../assets/icons/PencilIcon";
+
 
 const Discussions = () => {
   const [openDiscussionModal, setOpenDiscussionModal] = useState(false);
@@ -78,6 +85,13 @@ const Discussions = () => {
   const [allowSelect, setAllowSelect] = useState(false);
   const [forward, setForward] = useState(false);
   const [openMenuIndex, setOpenMenuIndex] = useState(null);
+  const [openGroupMenu,setOpenGroupMenu]=useState(false)
+  const [selectedMenu,setSelectedMenu]=useState("about")
+  const [enabled, setEnabled] = useState(false)
+
+  const handleSelectedMenu=(section)=>{
+    setSelectedMenu(section)
+  }
 
   const userId = JSON.parse(localStorage.getItem("user"))._id;
 
@@ -786,6 +800,8 @@ const Discussions = () => {
                         } cursor-pointer p-[12px] rounded-xl flex gap-[12px] `}
                         onClick={() => {
                           handleGroupOpen(group);
+                          handleSelectedMenu("about")
+                          setOpenGroupMenu(false)
                         }}
                       >
                         <img
@@ -878,8 +894,8 @@ const Discussions = () => {
             </div>
           </div>
         ) : groupChatRoom ? (
-          <div className="flex flex-col border border-[#D7D7D8] rounded-2xl relative bg-white w-full h-full ">
-            <div className="font-bold text-xl py-[16px] px-[24px] relative flex border-b border-[#D7D7D8] max-h-[80px] ">
+          <div className="flex flex-col border border-[#D7D7D8] bg-white rounded-2xl relative w-full h-full ">
+            <div className="font-bold text-xl py-[16px] px-[24px] relative flex border-b border-[#D7D7D8] max-h-[80px] " onClick={()=>setOpenGroupMenu(!openGroupMenu)} >
               <img
                 src={groupChatRoom.groupPic}
                 alt="Error"
@@ -974,20 +990,80 @@ const Discussions = () => {
               hasMore={hasMoreData}
               loader={<h4>Loading...</h4>}
               scrollableTarget="scrollableDiv"
-              className=" bg-white "
-              height={"70vh"}
+              className=" "
+              height={"72vh"}
             >
-              <div id="scrollableDiv" className=" flex flex-col gap-[16px] ">
+              <div id="scrollableDiv" className=" flex flex-col gap-[16px] relative ">
                 {chatMessage?.map((message, index) => {
                   return (
                     <>
+                    {openGroupMenu && (
+                      <div className=" absolute z-10 bg-[#16171C7A] h-[71vh] w-full flex p-[32px] gap-[24px] justify-center  ">
+                        <div className="w-full max-w-[300px] bg-white flex-col flex rounded-2xl h-[210px] p-[8px]">
+                          <p onClick={()=>handleSelectedMenu("about")} className={` ${selectedMenu=="about" && " bg-[#E8EFFA] "} rounded-xl flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px]  `}><InfoSquare/>About</p>
+                          <p onClick={()=>handleSelectedMenu("media")} className={` ${selectedMenu=="media" && " bg-[#E8EFFA] "} rounded-xl  flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}><MediaIcon/>Media</p>
+                          <p onClick={()=>handleSelectedMenu("document")} className={` ${selectedMenu=="document" && " bg-[#E8EFFA] "} rounded-xl  flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}><DocumentIcon/>Documents</p>
+                          <p onClick={()=>handleSelectedMenu("members")} className={` ${selectedMenu=="members" && " bg-[#E8EFFA] "} rounded-xl flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}><MemberIcon/>Members</p>
+                        </div>
+                        <div className=" max-w-[550px] bg-white w-full rounded-2xl ">
+                            {selectedMenu=="about" && (
+                              <div>
+                                <p className=" py-[16px] px-[24px] font-semibold text-[18px] leading-[27px] border-b border-[#D7D7D8] ">About {groupChatRoom?.chatName} </p>
+                                <div className=" flex gap-[24px] py-[16px] px-[24px] border-b border-[#D7D7D8] ">
+                                  <img src={groupChatRoom.groupPic} alt="Error" className=" w-[96px] h-[96px] rounded-full " />
+                                  <div className=" flex flex-col justify-center ">
+                                    <p className=" flex w-[164px] justify-between font-medium text-[#16171C] ">{groupChatRoom.chatName} <PencilIcon/></p>
+                                    <p className=" text-[#57585C] ">{groupChatRoom.users.length} Members</p>
+                                  </div>                                  
+                                </div>
+                                <div className=" p-[16px] pl-[24px] border-b border-[#D7D7D8] ">
+                                  <div className=" flex justify-between ">
+                                    <p className=" font-semibold ">Description</p>
+                                    <PencilIcon/>
+                                  </div>
+                                  <p className=" text-[16px] leading-[22px] ">{groupChatRoom.description}</p>
+                                </div>
+                                <div className=" p-[16px] pl-[24px] ">
+                                    <p className=" font-semibold ">Created</p>
+                                    <p className=" text-base leading-[22px] ">Room Created by <span className=" font-medium ">{JSON.parse(localStorage.getItem('user')).username==groupChatRoom.groupAdmin.username ? "You": groupChatRoom.groupAdmin.username }</span>, on {new Date(groupChatRoom.createdAt).toLocaleDateString('en-GB', {day: 'numeric',month: 'long',year: 'numeric',})} </p>
+                                </div>
+                                <div>
+                                  <p>Mute Notification</p>
+                                  <Switch
+                                      checked={enabled}
+                                      onChange={setEnabled}
+                                      className="group inline-flex h-6 w-11 items-center rounded-full bg-gray-200 transition data-[checked]:bg-blue-600"
+                                    >
+                                      <span className="size-4 translate-x-1 rounded-full bg-white transition group-data-[checked]:translate-x-6" />
+                                    </Switch>
+                                </div>  
+                              </div>
+                            )}
+                            {selectedMenu=="media" && (
+                              <div>
+                                About {groupChatRoom?.chatName} 
+                              </div>
+                            )}
+                            {selectedMenu=="document" && (
+                              <div>
+                                About {groupChatRoom?.chatName} 
+                              </div>
+                            )}
+                            {selectedMenu=="members" && (
+                              <div>
+                                About {groupChatRoom?.chatName} 
+                              </div>
+                            )}
+                        </div>
+                      </div>
+                    )}
                       <div
                         key={index}
                         ref={(el) => (messageRef.current[index] = el)}
                         data-id={message?._id}
                         className={` ${
                           message.sender?._id == userId &&
-                          "bg-red-50 flex-row-reverse "
+                          " flex-row-reverse "
                         }   mb-2 px-[24px] flex gap-[8px]  `}
                         onMouseEnter={() => setOpenMenuIndex(index)}
                         onMouseLeave={() => setOpenMenuIndex(null)}
@@ -1201,7 +1277,7 @@ const Discussions = () => {
                 })}
               </div>
             </InfiniteScroll>
-            <div className=" flex flex-col gap-[8px] absolute bottom-0 w-full py-[16px] px-[24px] bg-white border-t border-gray-300 rounded-b-2xl ">
+            <div className=" bg-white flex flex-col gap-[8px] absolute bottom-0 w-full py-[16px] px-[24px] border-t border-gray-300 rounded-b-2xl ">
               {replyMessage != null && (
                 <div className=" flex justify-between w-full bg-[#D7D7D8] p-[8px] rounded-lg text-[#949497] ">
                   <div className="  ">
