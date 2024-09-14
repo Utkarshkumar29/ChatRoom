@@ -50,7 +50,8 @@ const allMessage = asyncHandler(async (req, res) => {
       .populate("replyMessage", "content")
       .populate("chat")
       .skip((page - 1) * limit)
-      .limit(parseInt(limit));
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 })
 
     const totalPages = Math.ceil(totalMessages / limit);
     const response = {

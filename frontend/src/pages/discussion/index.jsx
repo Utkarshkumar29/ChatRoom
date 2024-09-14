@@ -56,6 +56,8 @@ import PencilIcon from "../../assets/icons/PencilIcon";
 import CrossIcon from "../../assets/icons/CrossIcon";
 import AlertIcon from "../../assets/icons/AlertIcon";
 import DoctIcon from "../../assets/icons/DoctIcon";
+import ClassicSpinner from "../../components/loader/ClassicSpinner";
+import TickIcon from "../../assets/icons/TickIcon";
 
 
 const Discussions = () => {
@@ -92,9 +94,12 @@ const Discussions = () => {
   const [selectedMenu,setSelectedMenu]=useState("about")
   const [enabled, setEnabled] = useState(false)
   const [openExitRoomModal,setExitRoomModal]=useState(false)
+  const [openDeleteRoomModal,setDeleteRoomModal]=useState(false)
   const [openReportRoomModal,setReportRoomModal]=useState(false)
   const [groupMedia,setGroupMedia]=useState([])
   const [groupDocument,setGroupDocument]=useState([])
+  const [editGroupName,setEditGroupName]=useState(null)
+  const [editGroupDescription,setEditGroupDescription]=useState(null)
 
   const ReasonsToReport=[
     "Hate speech or symbols",
@@ -256,7 +261,8 @@ const Discussions = () => {
   }, [groupChatRoom]);
 
   // Send a new message
-  const sendMessage = async () => {
+  const sendMessage = async (messageType) => {
+    console.log('mouse')
     try {
       if (editMessage) {
         const response = await axios.put("/api/message/edit", {
@@ -266,7 +272,7 @@ const Discussions = () => {
         setChatMessage((message) => {
           return message.map((item) =>
             item._id == editMessage._id
-              ? { ...item, content: newMessage }
+              ? {  content: newMessage,...item }
               : item
           );
         });
@@ -293,7 +299,7 @@ const Discussions = () => {
                 link: fileUrl,
                 messageType: file[0].type,
             });
-            setChatMessage((prevMessages) => [...prevMessages, response.data]);
+            setChatMessage((prevMessages) => [response.data,...prevMessages]);
             socket.current.emit("newMessage", response.data);
             setNewMessage("");
             console.log('power1',groupChatRoom?._id,fileUrl,file?.[0]?.type)
@@ -305,11 +311,11 @@ const Discussions = () => {
           chatId: groupChatRoom?._id,
           content: newMessage,
           replyTo: replyTo,
-          messageType: "text",
+          messageType: messageType ?? "text",
           link: null,
           replyMessage: replyMessage,
         });
-        setChatMessage((prevMessages) => [...prevMessages, response.data]);
+        setChatMessage((prevMessages) => [response.data,...prevMessages]);
         socket.current.emit("newMessage", response.data);
         setNewMessage("");
         const drafts = JSON.parse(localStorage.getItem("draftMessages")) || {};
@@ -751,6 +757,117 @@ const Discussions = () => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
 
+  const deleteGroup = async () => {
+    if (!groupChatRoom?._id) {
+      console.error("Group ID is not available.");
+      return;
+    }
+    try {
+      const response = await axios.delete(`/api/chats/${groupChatRoom?._id}`);    
+      if (response.status === 200) {
+        console.log("Group chat deleted successfully.");
+        await setGroups((prevGroups) => {
+          return prevGroups.filter((group) => group._id !== groupChatRoom._id);
+        });
+        setGroupChatRoom(groups[1] || null)
+        setDeleteRoomModal(false)
+        console.log(groupChatRoom)
+      } else {
+        console.warn(`Unexpected response: ${response.statusText}`);
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error("Server responded with an error:", error.response.data);
+      } else if (error.request) {
+        console.error("No response received:", error.request);
+      } else {
+        console.error("Error in setting up the request:", error.message);
+      }
+    }
+  };
+
+  const groupRemove=async()=>{
+    const userId=JSON.parse(localStorage.getItem('user'))._id;
+    const username=JSON.parse(localStorage.getItem('user')).username;
+    const data={
+      chatId:groupChatRoom?._id,
+      userId:userId
+    }
+    try {
+        const response=await axios.put(`/api/chats/groupremove`,data)
+        if(response.status==200){
+          console.log("User removed from group successfully")
+          setGroups((group)=>{
+            if(group?._id==groupChatRoom?._id){
+              return {...group,users:group.users.filter((user)=>user._id==JSON.parse(localStorage.getItem('user')._id))}
+            }else{
+              return group
+            }
+          })
+          setNewMessage(`${username} has left the group`)
+          sendMessage()
+        }else{
+          console.warn(`Unexpected response: ${response.statusText}`);
+        }
+    } catch (error) {
+        console.log(error)
+    }
+  }
+
+  const handleGroupNameChange = (e) => {
+    setEditGroupName(e.target.value);
+  };
+
+  const handleGroupDescriptionChange = (e) => {
+    setEditGroupDescription(e.target.value);
+  };
+
+  const updateGroup=async(e)=>{
+    e.preventDefault()
+    let data={}
+    if(editGroupDescription!=null){
+      data={
+        chatId:groupChatRoom?._id,
+        description:editGroupDescription,
+        chatName:null
+      }
+    }else{
+      data={
+        chatId:groupChatRoom?._id,
+        chatName:editGroupName,
+        description:null
+      }
+    }
+    console.log(data,'power')
+    try {
+        const response=await axios.put(`/api/chats/group`,data)
+        if(response.status==200){
+          console.log("Group updated successfully")
+          if(editGroupDescription!=null){
+            setGroupChatRoom((prev)=>{
+              return {...prev,description:editGroupDescription}
+            })
+          }else{
+            setGroups((prevGroups) => 
+              prevGroups.map(group =>
+                group._id === groupChatRoom?._id
+                  ? { ...group, chatName: editGroupName }
+                  : group
+              )
+            );
+            setGroupChatRoom((prev)=>{
+              return {...prev,chatName:editGroupName}
+            })
+          }
+          setEditGroupName(null)
+          setEditGroupDescription(null)
+        }
+    } catch (error) {
+        console.log(error)
+    }
+  }
+
+
   return (
     <>
       <div className="w-full flex h-screen bg-[#F2F3F5] py-[60px] px-[80px] gap-[32px]  ">
@@ -769,7 +886,7 @@ const Discussions = () => {
               Discussions
             </Link>
           </div>
-          <div className=" relative bg-[#FFFFFF] w-full h-full rounded-2xl border border-[#D7D7D8] ">
+          <div className=" relative bg-[#FFFFFF] w-full h-full rounded-3xl border border-[#D7D7D8] ">
             <div className="flex  items-center justify-between font-semibold text-lg border-b border-[#D7D7D8] py-[16px] px-[24px] ">
               My Discussion Room
               <div className=" relative top-1 ">
@@ -791,13 +908,13 @@ const Discussions = () => {
                         </div>
                       </MenuItem>
                       <MenuItem>
-                        <div className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] border border-[#D7D7D8] ">
+                        <div className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] border-y border-[#D7D7D8] ">
                           <UnreadMessageIcon />
                           Unread Chats
                         </div>
                       </MenuItem>
                       <MenuItem>
-                        <div className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] border border-[#D7D7D8] border-t-0  ">
+                        <div className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] border-b border-[#D7D7D8] border-t-0  ">
                           <ArchiveIcon />
                           Archived Chats
                         </div>
@@ -839,7 +956,23 @@ const Discussions = () => {
                 New Room
               </span>
             </div>
-            <div className=" p-[24px] pt-0 ">
+            <InfiniteScroll
+              dataLength={chatMessage?.length || 0}
+              next={fetchMoreChats}
+              hasMore={hasMoreData}
+              style={{ 
+                display: 'flex', 
+                flexDirection: 'column', // Ensure items are in reverse order
+                overflowY: 'auto',// Enable vertical scrolling,
+                padding:"16px"
+              }}
+              loader={<div className=" w-full h-[40px] bg-red-950 ">
+                <ClassicSpinner/>
+              </div>}
+              scrollableTarget="scrollableDiv"
+              className=" "
+              height={"60vh"}
+            >
               {groups &&
                 !openDraft &&
                 groups.map((group, index) => {
@@ -861,7 +994,7 @@ const Discussions = () => {
                         />
                         <div className=" w-full ">
                           <div className=" flex justify-between w-full items-center ">
-                            <p className=" font-medium text-base ">
+                            <p className=" font-medium text-base text-[#16171C] ">
                               {group?.chatName}
                             </p>
                             <p className=" text-[#949497] text-[12px] leading-[18px] ">
@@ -869,7 +1002,7 @@ const Discussions = () => {
                             </p>
                           </div>
                           <div className=" flex w-full justify-between ">
-                            <p>
+                            <p className=" text-[#57585C] ">
                               {draftMessages && draftMessages[group?._id] ? (
                                 <p>
                                   <span className=" text-[#1660CD] font-medium  ">
@@ -921,7 +1054,7 @@ const Discussions = () => {
                     </div>
                   );
                 })}
-            </div>
+            </InfiniteScroll>
           </div>
         </div>
         {openStarChat ? (
@@ -959,29 +1092,12 @@ const Discussions = () => {
             </div>
             {pinnedMessages.map((message, index) => {
               return (
-                <div key={index} className="mb-2 bg-red-400">
-                  <p
-                    className=" bg-yellow-300 cursor-pointer "
-                    onClick={() => {
-                      handlePinMessage(message);
-                    }}
-                  >
-                    Unpin
-                  </p>
-                  {allowSelect && (
-                    <input
-                      type="checkbox"
-                      onClick={() =>
-                        setSelectMessage((prev) => {
-                          return [...prev, message];
-                        })
-                      }
-                    />
-                  )}
-                  <p>
-                    <strong>Sender:</strong> {message.sender.username}
-                  </p>
-
+                <div key={index} className=" absolute top-20 w-[97.5%] z-10 mb-2 bg-[#E8EFFA] m-[16px] p-[16px] rounded-2xl gap-[16px]  flex items-center">
+                  <PinIcon/>
+                  <div className=" w-full ">
+                    <p className=" font-medium ">Pinned Message</p>
+                    <div className=" flex " >
+               <p className=" text-[#949497] ">{message?.sender.username}:{"  "} </p>
                   <div className=" flex gap-[24px]  ">
                     {!message.isDeleted || !message.isDeletedForEveryOne ? (
                       <p>{message.content}</p>
@@ -1032,47 +1148,68 @@ const Discussions = () => {
                         )}
                     </div>
                   </div>
+                    </div>
+                  </div>
+                  <p
+                    className=" py-[12px] px-[32px] rounded-xl bg-[#1660CD] text-white max-h-[44px] max-w-[106px] flex justify-center items-center cursor-pointer "
+                    onClick={() => {
+                      handlePinMessage(message);
+                    }}
+                  >
+                    Unpin
+                  </p>
                 </div>
               );
             })}
-            <InfiniteScroll
-              dataLength={chatMessage?.length || 0}
-              next={fetchMoreChats}
-              hasMore={hasMoreData}
-              loader={<h4>Loading...</h4>}
-              scrollableTarget="scrollableDiv"
-              className=" "
-              height={"72vh"}
-            >
-              <div id="scrollableDiv" className=" flex flex-col gap-[16px] relative ">
-                {chatMessage?.map((message, index) => {
-                  return (
-                    <>
-                    {openGroupMenu && (
-                      <div className=" absolute z-10 bg-[#16171C7A] h-[71vh] w-full flex p-[32px] gap-[24px] justify-center  ">
-                        <div className="w-full max-w-[300px] h-min bg-white flex-col flex rounded-2xl p-[8px]">
+            {openGroupMenu && (
+                      <div className=" absolute top-20  z-10 bg-[#16171C7A] w-full min-h-[78.55vh] rounded-b-2xl flex p-[32px] gap-[24px] justify-center  ">
+                        <div className="w-full max-w-[300px] cursor-pointer h-min bg-white flex-col flex rounded-2xl p-[8px]">
                           <p onClick={()=>handleSelectedMenu("about")} className={` ${selectedMenu=="about" && " bg-[#E8EFFA] "} rounded-xl flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px]  `}><InfoSquare/>About</p>
                           <p onClick={()=>handleSelectedMenu("media")} className={` ${selectedMenu=="media" && " bg-[#E8EFFA] "} rounded-xl  flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}><MediaIcon/>Media</p>
                           <p onClick={()=>handleSelectedMenu("document")} className={` ${selectedMenu=="document" && " bg-[#E8EFFA] "} rounded-xl  flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}><DocumentIcon/>Documents</p>
                           <p onClick={()=>handleSelectedMenu("members")} className={` ${selectedMenu=="members" && " bg-[#E8EFFA] "} rounded-xl flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}><MemberIcon/>Members</p>
                         </div>
-                        <div className=" max-w-[550px] h-min bg-white w-full rounded-2xl ">
+                        <div className=" max-w-[550px] h-min bg-white w-full rounded-2xl  ">
                             {selectedMenu=="about" && (
-                              <div className=" ">
+                              <div className="  ">
                                 <p className=" py-[16px] px-[24px] font-semibold text-[18px] leading-[27px] border-b border-[#D7D7D8] ">About {groupChatRoom?.chatName} </p>
                                 <div className=" flex gap-[24px] py-[16px] px-[24px] border-b border-[#D7D7D8] ">
-                                  <img src={groupChatRoom.groupPic} alt="Error" className=" w-[96px] h-[96px] rounded-full " />
-                                  <div className=" flex flex-col justify-center ">
-                                    <p className=" flex w-[164px] justify-between font-medium text-[#16171C] ">{groupChatRoom?.chatName} <PencilIcon/></p>
-                                    <p className=" text-[#57585C] ">{groupChatRoom.users.length} Members</p>
+                                  <img src={groupChatRoom.groupPic} alt="Error" className=" min-w-[96px] h-[96px] rounded-full  " />
+                                  <div className=" flex flex-col justify-center w-full ">
+                                    {editGroupName!=null ? (
+                                      <form className=" flex items-center gap-[24px] w-full" onSubmit={updateGroup}>
+                                        <input className=" w-full border border-[#D7D7D8] py-[10px] px-[24px] rounded-xl outline-none " placeholder="Enter new  group name" onChange={handleGroupNameChange}/>
+                                        <div className=" flex gap-[16px] ">
+                                        <span onClick={()=>setEditGroupName(null)} className=" cursor-pointer "><CrossIcon/></span>
+                                        <button type="submit"><TickIcon/></button>
+                                        </div>
+                                        </form>
+                                    ):(<div>
+                                      <p className=" flex w-[164px] justify-between font-medium text-[#16171C] ">{groupChatRoom?.chatName} <span onClick={()=>setEditGroupName("")}><PencilIcon/></span> </p>
+                                      <p className=" text-[#57585C] ">{groupChatRoom.users.length} Members</p>
+                                    </div>)}
                                   </div>                                  
                                 </div>
                                 <div className=" p-[16px] pl-[24px] border-b border-[#D7D7D8] ">
                                   <div className=" flex justify-between ">
-                                    <p className=" font-semibold ">Description</p>
-                                    <PencilIcon/>
+                                    {editGroupDescription!=null ? (
+                                       <form className=" flex items-center gap-[24px] w-full" onSubmit={updateGroup}>
+                                       <input className=" w-full border border-[#D7D7D8] py-[10px] px-[24px] rounded-xl outline-none " placeholder="Enter new  group name" onChange={handleGroupDescriptionChange}/>
+                                       <div className=" flex gap-[16px] ">
+                                       <span onClick={()=>setEditGroupDescription(null)} className=" cursor-pointer "><CrossIcon/></span>
+                                       <button type="submit"><TickIcon/></button>
+                                       </div>
+                                       </form>
+                                    ):(
+                                      <div className=" w-full ">
+                                      <div className=" flex justify-between items-center ">
+                                      <p className=" font-semibold ">Description</p>
+                                      <span onClick={()=>setEditGroupDescription("")} ><PencilIcon/></span>
+                                      </div>
+                                      <p className=" text-[16px] leading-[22px] ">{groupChatRoom.description}</p>
+                                      </div>
+                                    )}
                                   </div>
-                                  <p className=" text-[16px] leading-[22px] ">{groupChatRoom.description}</p>
                                 </div>
                                 <div className=" p-[16px] pl-[24px] border-b border-[#D7D7D8]  ">
                                     <p className=" font-semibold ">Created</p>
@@ -1089,9 +1226,15 @@ const Discussions = () => {
                                     </Switch>
                                 </div>
                                 <div className=" py-[16px] px-[32px] flex gap-[16px] justify-center ">
-                                    <button onClick={()=>setExitRoomModal(true)} className=" cursor-pointer w-[220px] text-[#57585C] border border-[#57585C] py-[12px] px-[40px] rounded-2xl flex justify-center ">
+                                    {groupChatRoom?.groupAdmin._id==JSON.parse(localStorage.getItem('user'))._id? (
+                                      <button onClick={()=>setDeleteRoomModal(true)} className=" cursor-pointer w-[220px] text-[#57585C] border border-[#57585C] py-[12px] px-[40px] rounded-2xl flex justify-center ">
+                                      Delete Room
+                                    </button>
+                                    ):(
+                                      <button onClick={()=>setExitRoomModal(true)} className=" cursor-pointer w-[220px] text-[#57585C] border border-[#57585C] py-[12px] px-[40px] rounded-2xl flex justify-center ">
                                       Exit Room
                                     </button>
+                                    )}
                                     <button onClick={()=>setReportRoomModal(true)} className=" cursor-pointer w-[220px] text-[#FA1111] border border-[#FA1111] py-[12px] px-[40px] rounded-2xl flex justify-center ">
                                       Report Room
                                     </button>
@@ -1102,13 +1245,17 @@ const Discussions = () => {
                               <div>
                                 <p className=" py-[16px] px-[24px] font-semibold text-[18px] leading-[27px] border-b border-[#D7D7D8] ">Media</p>
                                 <div className=" flex flex-wrap p-[16px] gap-[16px] ">
-                                  {groupMedia.map((image,index)=>{
-                                    return(
-                                      <div className="">
-                                      <img src={image.link} alt="Error" className=" w-[90px] h-[90px]"/>
-                                    </div>
-                                    )
-                                  })}
+                                  {groupMedia.length>0 ? (
+                                    groupMedia.map((image,index)=>{
+                                      return(
+                                        <div className="">
+                                        <img src={image.link} alt="Error" className=" w-[90px] h-[90px]"/>
+                                      </div>
+                                      )
+                                    })
+                                  ):(
+                                    <p>No media is exchanged</p>
+                                  )}
                                 </div>
                               </div>
                             )}
@@ -1116,15 +1263,19 @@ const Discussions = () => {
                               <div>
                                 <p className=" py-[16px] px-[24px] font-semibold text-[18px] leading-[27px] border-b border-[#D7D7D8] ">Documents</p>
                                 <div className=" flex flex-col p-[16px] gap-[16px] ">
-                                {groupDocument.map((doc,index)=>{
-                                  console.log(doc.link,'trying')
-                                    return(
-                                      <div className=" flex gap-[16px] ">
-                                        <a  href={doc.link}><DoctIcon/></a>
-                                        <p className=" relative top-1 flex gap-[6px] items-center ">{extractFileName(doc.link)}</p>  
-                                      </div>
-                                    )
-                                  })}
+                                {groupDocument.length>0 ? (
+                                  groupDocument.map((doc,index)=>{
+                                    console.log(doc.link,'trying')
+                                      return(
+                                        <div className=" flex gap-[16px] ">
+                                          <a  href={doc.link}><DoctIcon/></a>
+                                          <p className=" relative top-1 flex gap-[6px] items-center ">{extractFileName(doc.link)}</p>  
+                                        </div>
+                                      )
+                                    })
+                                ):(
+                                  <p>No Document is exchanged</p>
+                                )}
                                   </div>
                               </div>
                             )}
@@ -1152,6 +1303,32 @@ const Discussions = () => {
                         </div>
                       </div>
                     )}
+            <InfiniteScroll
+              dataLength={chatMessage?.length || 0}
+              next={fetchMoreChats}
+              hasMore={hasMoreData}
+              style={{ 
+                display: 'flex', 
+                flexDirection: 'column-reverse', // Ensure items are in reverse order
+                overflowY: 'auto' // Enable vertical scrolling
+              }}
+              loader={<ClassicSpinner/>}
+              scrollableTarget="scrollableDiv"
+              className=" "
+              height={"72vh"}
+            >
+              <div id="scrollableDiv" className=" flex flex-col gap-[16px] relative ">
+                {[...chatMessage].reverse().map((message, index) => {
+                  const currentDate=new Date(message.createdAt).toLocaleDateString()
+                  const storedDate=currentDate
+                  
+                  return (
+                    <>
+                    <div className=" flex justify-center items-center ">
+                    <p className="bg-[#57585C] text-white text-[12px] leading-[18px] py-[6px] px-[16px] rounded-lg">
+                    {currentDate==new Date().toLocaleDateString() ? "Today":currentDate}
+                  </p>
+                    </div>
                       <div
                         key={index}
                         ref={(el) => (messageRef.current[index] = el)}
@@ -1209,9 +1386,11 @@ const Discussions = () => {
                                   </p>
                                   </div>
                                 ) : (
-                                  <p className="pr-[54px] pt-[4px] px-[8px] pb-[6px]  ">
+                                  message?.content && (
+                                    <p className="pr-[54px] pt-[4px] px-[8px] pb-[6px]  ">
                                     {message?.content}
                                   </p>
+                                  )
                                 )
                               ) : (
                                 <p>Message is deleted</p>
@@ -1219,9 +1398,9 @@ const Discussions = () => {
                             
 
                           {message.messageType == "application/pdf" && (
-                            <div className={`${message.sender?._id == userId ? " ": ""} relative -top-2 flex flex-col gap-[4px] `}>
+                            <div className={`${message.sender?._id == userId ? " ": ""} flex flex-col gap-[4px] `}>
                               <div className={` w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${message.sender?._id == userId ? "bg-[#EDF3FB] ": "bg-[#F2F3F5]"} `}><a  href={message.link}><DownloadIcon/></a></div>
-                              <p className=" relative top-1 flex gap-[6px] items-center "><PDFIcon/> {extractFileName(message.link)}</p>                              
+                              <p className="flex gap-[6px] items-center  "><PDFIcon/> {extractFileName(message.link)}</p>                              
                             </div>
                           )}
 
@@ -1231,23 +1410,23 @@ const Discussions = () => {
                                 src={message.link}
                                 alt="Uploaded file"
                                 style={{ maxWidth: "100%", height: "auto" }}
-                                className=" pr-[8px] "
+                                className=" pb-[12px] "
                               />
                             )}
 
                           {message?.messageType == "application/msword" &&
                             message.link != null && (
-                              <div className={`${message.sender?._id == userId ? " ": ""} relative -top-2 flex flex-col gap-[4px] `}>
+                              <div className={`${message.sender?._id == userId ? " ": ""} flex flex-col gap-[4px] `}>
                               <div className={` w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${message.sender?._id == userId ? "bg-[#EDF3FB] ": "bg-[#F2F3F5]"} `}><a  href={message.link}><DownloadIcon/></a></div>
-                              <p className=" relative top-1 flex gap-[6px] items-center "><ExcelIcon/> {extractFileName(message.link)}</p>                              
+                              <p className=" xs flex gap-[6px] items-center h-[36px] "><ExcelIcon/> {extractFileName(message.link)}</p>                              
                             </div>
                             )}
 
                           {message?.messageType == "application/vnd.ms-excel" &&
                             message.link != null && (
-                              <div className={`${message.sender?._id == userId ? " ": ""} relative -top-2 flex flex-col gap-[4px] `}>
+                              <div className={`${message.sender?._id == userId ? " ": ""} flex flex-col gap-[4px] `}>
                               <div className={` w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${message.sender?._id == userId ? "bg-[#EDF3FB] ": "bg-[#F2F3F5]"} `}><a  href={message.link}><DownloadIcon/></a></div>
-                              <p className=" relative top-1 flex gap-[6px] items-center "><ExcelIcon/> {extractFileName(message.link)}</p>                              
+                              <p className=" flex gap-[6px] items-center h-[36px] "><ExcelIcon/> {extractFileName(message.link)}</p>                              
                             </div>
                             )}
       
@@ -1274,13 +1453,14 @@ const Discussions = () => {
                             />
                           </p>
                         </div>
+
                         {openMenuIndex == index && (
                           <Menu>
                             <MenuButton>
                               <DownArrow />
                             </MenuButton>
                             <MenuItems anchor="bottom right">
-                              <div className=" bg-white w-[200px] border border-[#D7D7D8] rounded-3xl rounded-tl-[2px]  ">
+                              <div className=" bg-white w-[200px] border border-[#D7D7D8] rounded-3xl rounded-tl-[2px] cursor-pointer  ">
                                 <MenuItem>
                                   <p
                                     className="flex gap-[12px] data-[focus]:bg-blue-100 hover:rounded-tr-3xl pt-[12px] pr-[24px] pb-[12px] pl-[16px] border-b border-[#D7D7D8] "
@@ -1314,7 +1494,7 @@ const Discussions = () => {
                                       handlePinMessage(message);
                                     }}
                                   >
-                                    <PinIcon /> Pin
+                                    <PinIcon iconColor={message.isPinned ? "#1660CD":"#57585C" } /> {message.isPinned ? <span className=" text-[#1660CD] ">Unpin</span>:<span>Pin</span>}
                                   </p>
                                 </MenuItem>
                                 <MenuItem>
@@ -1682,7 +1862,7 @@ const Discussions = () => {
             <DialogPanel className="w-full max-w-[414px] transform overflow-hidden rounded-3xl bg-white text-left align-middle shadow-xl transition-all">
               <DialogTitle as="h3" className="text-lg font-bold">
                 <div className=" flex justify-between py-[24px] px-[32px] ">
-                <p>Exit Room</p>
+                <p className=" font-semibold text-[20px] leading-[32px] ">Exit Room</p>
                 <span onClick={()=>setExitRoomModal(false)}><CrossIcon/></span>
                 </div>
               </DialogTitle>
@@ -1694,7 +1874,7 @@ const Discussions = () => {
                   </div>
                 </Description>
                 <div className=" justify-center flex gap-[24px] py-[16px] px-[32px] ">
-                <button className=" bg-[#FA1111] text-white py-[12px] px-[40px] rounded-2xl max-w-[131px] w-full max-h-[44px] flex justify-center items-center ">
+                <button onClick={()=>groupRemove()} className=" bg-[#FA1111] text-white py-[12px] px-[40px] rounded-2xl max-w-[131px] w-full max-h-[44px] flex justify-center items-center ">
                     Exit
                   </button>
                   <button onClick={()=>setExitRoomModal(false)} className=" border border-[#1660CD] text-[#1660CD] py-[12px] px-[40px] rounded-2xl max-w-[131px] max-h-[44px] flex justify-center items-center ">
@@ -1715,10 +1895,10 @@ const Discussions = () => {
         >
           <div className="flex min-h-screen items-center justify-center text-center">
             <DialogPanel className="w-full max-w-[560px] transform overflow-hidden rounded-3xl bg-white text-left align-middle shadow-xl transition-all">
-              <DialogTitle as="h3" className="text-lg font-bold">
+              <DialogTitle as="h3">
                 <div className=" flex justify-between py-[24px] px-[32px] ">
-                <p>Report Room</p>
-                <span onClick={()=>setExitRoomModal(false)}><CrossIcon/></span>
+                <p className=" font-semibold text-[20px] leading-[32px] ">Report Room</p>
+                <span onClick={()=>setReportRoomModal(false)}><CrossIcon/></span>
                 </div>
               </DialogTitle>
               <div className="">
@@ -1739,7 +1919,42 @@ const Discussions = () => {
                 <button className=" bg-[#FA1111] text-white py-[12px] px-[40px] rounded-xl max-w-[186px] whitespace-nowrap w-full max-h-[44px] flex justify-center items-center ">
                   Report and Exit
                   </button>
-                  <button onClick={()=>setExitRoomModal(false)} className=" border border-[#1660CD] text-[#1660CD] py-[12px] px-[40px] rounded-xl max-w-[131px] max-h-[44px] flex justify-center items-center ">
+                  <button onClick={()=>setReportRoomModal(false)} className=" border border-[#1660CD] text-[#1660CD] py-[12px] px-[40px] rounded-xl max-w-[131px] max-h-[44px] flex justify-center items-center ">
+                  Cancel 
+                  </button>
+                </div>
+              </div>
+            </DialogPanel>
+          </div>
+        </Dialog>
+      </Transition>
+
+      <Transition appear show={openDeleteRoomModal} as={Fragment}>
+        <Dialog
+          as="div"
+          className="fixed inset-0 z-40 overflow-y-aut0 bg-[#16171C] bg-opacity-[48%] "
+          onClose={()=>{setDeleteRoomModal(false)}}
+        >
+          <div className="flex min-h-screen items-center justify-center text-center">
+            <DialogPanel className="w-full max-w-[560px] transform overflow-hidden rounded-3xl bg-white text-left align-middle shadow-xl transition-all">
+              <DialogTitle as="h3" className="text-lg font-bold">
+                <div className=" flex justify-between py-[24px] px-[32px] ">
+                <p className=" font-semibold text-[20px] leading-[32px] ">Delete Room</p>
+                <span onClick={()=>setDeleteRoomModal(false)}><CrossIcon/></span>
+                </div>
+              </DialogTitle>
+              <div className="">
+                <Description>
+                <div className=" p-[32px] flex justify-center items-center text-center flex-col gap-[16px] border-y border-[#D7D7D8]  ">
+                  <AlertIcon/>
+                  <p className=" font-medium ">Are you sure<br/> want to delete “{groupChatRoom?.chatName}” room ?</p>
+                  </div>
+                </Description>
+                <div className=" justify-center flex gap-[24px] py-[16px] px-[32px] ">
+                <button onClick={()=>deleteGroup()} className=" bg-[#FA1111] text-white py-[12px] px-[40px] rounded-xl max-w-[186px] whitespace-nowrap w-full max-h-[44px] flex justify-center items-center ">
+                  Delete Group
+                  </button>
+                  <button onClick={()=>setDeleteRoomModal(false)} className=" border border-[#1660CD] text-[#1660CD] py-[12px] px-[40px] rounded-xl max-w-[131px] max-h-[44px] flex justify-center items-center ">
                   Cancel 
                   </button>
                 </div>

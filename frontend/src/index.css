@@ -4,7 +4,7 @@
 
 body {
   margin: 0;
-  font-family: Poppins;
+  font-family: "Poppins";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -51,4 +51,28 @@ input[type="checkbox"]:checked {
 input[type="checkbox"]:checked::before {
   transform: scale(1);
   background-color: white;
+}
+
+/* Style the scrollbar */
+::-webkit-scrollbar {
+  width: 4px; /* Width of the scrollbar */
+  height: 12px; /* Height of the horizontal scrollbar */
+}
+
+/* Style the track (part the scrollbar slides within) */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Color of the track */
+  border-radius: 10px; /* Round the corners */
+}
+
+/* Style the handle (the draggable part of the scrollbar) */
+::-webkit-scrollbar-thumb {
+  background: #888; /* Color of the handle */
+  border-radius: 10px; /* Round the corners */
+  
+}
+
+/* Style the handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Darker color on hover */
 }
