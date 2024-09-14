@@ -262,7 +262,7 @@ const Discussions = () => {
 
   // Send a new message
   const sendMessage = async (messageType) => {
-    console.log('mouse')
+    console.log('faltu')
     try {
       if (editMessage) {
         const response = await axios.put("/api/message/edit", {
@@ -306,12 +306,39 @@ const Discussions = () => {
             setFile(null)
         }
         console.log('power1',groupChatRoom?._id,fileUrl,file)
+      } else if(messageType=="left"){
+        console.log(newMessage,"faltu1")
+  
+        const response = await axios.post("/api/message", {
+          chatId: groupChatRoom?._id,
+          content:  `${JSON.parse(localStorage.getItem('user')).username} has left the group`,
+          messageType:"left",
+        });
+  
+        setChatMessage((prevMessages) => [response.data,...prevMessages]);
+        socket.current.emit("newMessage", response.data);
+        setNewMessage("");
+        const drafts = JSON.parse(localStorage.getItem("draftMessages")) || {};
+
+        // Remove the specific draft for the current chat room
+        delete drafts[groupChatRoom?._id];
+        // Save the updated drafts back to localStorage
+        localStorage.setItem("draftMessages", JSON.stringify(drafts));
+        setDraftMessages((prev) => {
+          // Filter out the draft message for the current chat room
+          const updatedDrafts = { ...prev };
+          delete updatedDrafts[groupChatRoom?._id];
+          return updatedDrafts;
+        });
+        setReplyTo(null)
+        setReplyMessage(null)
       } else {
+        console.log("faltu2")
         const response = await axios.post("/api/message", {
           chatId: groupChatRoom?._id,
           content: newMessage,
           replyTo: replyTo,
-          messageType: messageType ?? "text",
+          messageType:"text",
           link: null,
           replyMessage: replyMessage,
         });
@@ -335,6 +362,8 @@ const Discussions = () => {
       }
     } catch (error) {
       console.log("Error sending message:", error);
+    }finally{
+      console.log("faltu3")
     }
   };
 
@@ -353,7 +382,7 @@ const Discussions = () => {
         groupChatRoom &&
         groupChatRoom?._id === newMessageReceived.chat?._id
       ) {
-        setChatMessage((prevMessages) => [...prevMessages, newMessageReceived]);
+        setChatMessage((prevMessages) => [newMessageReceived,...prevMessages, ]);
       } else {
         console.log("Message received in a different chat.");
       }
@@ -794,7 +823,7 @@ const Discussions = () => {
       userId:userId
     }
     try {
-        const response=await axios.put(`/api/chats/groupremove`,data)
+      const response=await axios.put(`/api/chats/groupremove`,data)
         if(response.status==200){
           console.log("User removed from group successfully")
           setGroups((group)=>{
@@ -805,7 +834,7 @@ const Discussions = () => {
             }
           })
           setNewMessage(`${username} has left the group`)
-          sendMessage()
+          sendMessage("left")
         }else{
           console.warn(`Unexpected response: ${response.statusText}`);
         }
@@ -813,6 +842,10 @@ const Discussions = () => {
         console.log(error)
     }
   }
+
+  useEffect(()=>{
+    console.log(newMessage,'power')
+  },[newMessage])
 
   const handleGroupNameChange = (e) => {
     setEditGroupName(e.target.value);
@@ -1015,9 +1048,9 @@ const Discussions = () => {
                                 "Start a converstion"
                               )}
                             </p>
-                            <p className=" bg-[#1660CD] text-[10px] text-white rounded-lg py-[6px] px-[8px] max-h-[20px] max-w-[22px] flex items-center ">
-                              2
-                            </p>
+                            {group?.unSeenMessage>0 ? <p className=" bg-[#1660CD] text-[10px] text-white rounded-lg py-[6px] px-[8px] max-h-[20px] max-w-[22px] flex items-center ">
+                              {group?.unSeenMessage}
+                            </p>:""}
                           </div>
                         </div>
                       </p>
@@ -1146,6 +1179,9 @@ const Discussions = () => {
                             <a href={message.link}>Word</a>
                           </div>
                         )}
+
+                      {message?.messageType=="left" && 
+                      <div>{message.content} has left the group</div>}
                     </div>
                   </div>
                     </div>
