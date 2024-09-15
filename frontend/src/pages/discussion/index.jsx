@@ -188,6 +188,7 @@ const Discussions = () => {
       const response = await axios.post("/api/chats/group", data);
       setOpenDiscussionModal(false); // Close modal after creation
       accessChat(); // Refresh chat list after creating a room
+      setFileUrl("")
     } catch (error) {
       console.error("Error creating discussion room:", error);
     }
@@ -265,6 +266,7 @@ const Discussions = () => {
     console.log('faltu')
     try {
       if (editMessage) {
+        console.log(newMessage,"faltu1")
         const response = await axios.put("/api/message/edit", {
           messageId: editMessage._id,
           content: newMessage,
@@ -290,7 +292,8 @@ const Discussions = () => {
           return updatedDrafts;
         });
       } else if( fileUrl ){
-        
+        console.log(newMessage,"faltu2")
+        console.log(fileUrl)
           // Send message with file URL
           if (groupChatRoom?._id && fileUrl && file?.[0]?.type) {
             const response = await axios.post("/api/message", {
@@ -307,7 +310,7 @@ const Discussions = () => {
         }
         console.log('power1',groupChatRoom?._id,fileUrl,file)
       } else if(messageType=="left"){
-        console.log(newMessage,"faltu1")
+        console.log(newMessage,"faltu3")
   
         const response = await axios.post("/api/message", {
           chatId: groupChatRoom?._id,
@@ -333,7 +336,7 @@ const Discussions = () => {
         setReplyTo(null)
         setReplyMessage(null)
       } else {
-        console.log("faltu2")
+        console.log("faltu4")
         const response = await axios.post("/api/message", {
           chatId: groupChatRoom?._id,
           content: newMessage,
@@ -363,7 +366,7 @@ const Discussions = () => {
     } catch (error) {
       console.log("Error sending message:", error);
     }finally{
-      console.log("faltu3")
+      console.log("faltu5")
     }
   };
 
@@ -378,14 +381,26 @@ const Discussions = () => {
       console.log("Current chat room ID:", groupChatRoom?._id);
       console.log("Received message's chat ID:", newMessageReceived.chat?._id);
 
-      if (
-        groupChatRoom &&
-        groupChatRoom?._id === newMessageReceived.chat?._id
+      if (groupChatRoom && groupChatRoom?._id === newMessageReceived.chat?._id
       ) {
         setChatMessage((prevMessages) => [newMessageReceived,...prevMessages, ]);
       } else {
         console.log("Message received in a different chat.");
       }
+
+      setGroups((prevMessages) => 
+        prevMessages.map((message) => {
+          if (message._id === newMessageReceived.chat._id) {
+            return {
+              ...message,
+              unSeenMessage: message.unSeenMessage + 1,
+              latestMessage:newMessageReceived
+            };
+          } else {
+            return message;
+          }
+        })
+      );
     };
 
     socket.current.on("message received", handleMessageReceived);
@@ -395,7 +410,7 @@ const Discussions = () => {
     };
   }, [groupChatRoom]);
 
-  useEffect(() => {}, [chatMessage]);
+  useEffect(() => console.log(groups,'lol'), [groups]);
 
   const [nextLink, setNextLink] = useState("");
   // Fetch chat messages
@@ -743,6 +758,7 @@ const Discussions = () => {
       const response = await axios.put(`/api/message/seen`, {
         messageId: messageId,
         userId: userId,
+        chatId:groupChatRoom?._id
       });
       setChatMessage((messages) =>
         messages.map((message) =>
@@ -750,7 +766,8 @@ const Discussions = () => {
             ? { ...message, isReadByAll: [...message.isReadByAll, userId] }
             : message
         )
-      );
+      )
+      
     } catch (error) {
       console.log(error);
     }
@@ -920,15 +937,15 @@ const Discussions = () => {
             </Link>
           </div>
           <div className=" relative bg-[#FFFFFF] w-full h-full rounded-3xl border border-[#D7D7D8] ">
-            <div className="flex  items-center justify-between font-semibold text-lg border-b border-[#D7D7D8] py-[16px] px-[24px] ">
-              My Discussion Room
-              <div className=" relative top-1 ">
+            <div className="flex relative  items-center justify-between font-semibold text-lg border-b border-[#D7D7D8] py-[16px] px-[24px] ">
+              <p>My Discussion Room</p>
+              <div className="  ">
                 <Menu>
                   <MenuButton>
                     <FilterIcon />
                   </MenuButton>
                   <MenuItems anchor="bottom ">
-                    <div className=" bg-white w-[200px] flex flex-col justify-center rounded-3xl border border-[#D7D7D8] rounded-tr-[2px]  ">
+                    <div className=" cursor-pointer bg-white w-[200px] flex flex-col justify-center rounded-3xl border border-[#D7D7D8] rounded-tr-[2px]  ">
                       <MenuItem>
                         <div
                           className="flex  data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px]  hover:rounded-tl-2xl  "
@@ -1009,6 +1026,7 @@ const Discussions = () => {
               {groups &&
                 !openDraft &&
                 groups.map((group, index) => {
+                  console.log('copy',group)
                   return (
                     <div key={index}>
                       <p
@@ -1048,9 +1066,20 @@ const Discussions = () => {
                                 "Start a converstion"
                               )}
                             </p>
-                            {group?.unSeenMessage>0 ? <p className=" bg-[#1660CD] text-[10px] text-white rounded-lg py-[6px] px-[8px] max-h-[20px] max-w-[22px] flex items-center ">
-                              {group?.unSeenMessage}
-                            </p>:""}
+                            {(group.unSeenMessages || []).map((unSeenMessage) => {
+                              const loggedInUserId = JSON.parse(localStorage.getItem('user'))._id; // Get logged-in user ID
+                            console.log(loggedInUserId,unSeenMessage.user,'copy',group.unSeenMessage)
+                              // Check if the user ID matches the logged-in user
+                              if (unSeenMessage.user === loggedInUserId) {
+                                return (
+                                  <div key={unSeenMessage.user} className="bg-[#1660CD] text-[10px] text-white rounded-lg py-[6px] px-[8px] max-h-[20px] max-w-[22px] flex items-center ">
+                                    {unSeenMessage.count} {/* Display the unseen message count */}
+                                  </div>
+                                );
+                              }
+
+  return null; // Return null if the user does not match
+})}
                           </div>
                         </div>
                       </p>
@@ -1346,7 +1375,8 @@ const Discussions = () => {
               style={{ 
                 display: 'flex', 
                 flexDirection: 'column-reverse', // Ensure items are in reverse order
-                overflowY: 'auto' // Enable vertical scrolling
+                overflowY: 'auto', // Enable vertical scrolling
+                paddingBottom:"10px"
               }}
               loader={<ClassicSpinner/>}
               scrollableTarget="scrollableDiv"
@@ -1402,13 +1432,13 @@ const Discussions = () => {
                             message.sender?._id == userId
                               ? "bg-[#DAE6F7]  rounded-tr-[2px]  "
                               : "bg-[#D7D7D8] rounded-tl-[2px]"
-                          } relative p-[8px] pb-[6px] rounded-xl max-w-xl`}
+                          } relative p-[8px] pb-[6px] rounded-xl max-w-xl `}
                         >
                             
                               {!message.isDeleted ||
                               !message.isDeletedForEveryOne ? (
                                 message?.replyTo && message?.replyMessage ? (
-                                  <div className="  w-full ">
+                                  <div className=" w-full ">
                                     <div className={`   ${message.sender?._id == userId ? "bg-[#EDF3FB] ": "bg-[#F2F3F5]"} w-full p-[8px] rounded-[8px]  `}>
                                       <p className=" font-medium text-base text-[#949494] ">
                                         {message?.sender.username}
@@ -1423,7 +1453,7 @@ const Discussions = () => {
                                   </div>
                                 ) : (
                                   message?.content && (
-                                    <p className="pr-[54px] pt-[4px] px-[8px] pb-[6px]  ">
+                                    <p className=" last:mb-4 pr-[54px] pt-[4px] px-[8px] pb-[6px]  ">
                                     {message?.content}
                                   </p>
                                   )

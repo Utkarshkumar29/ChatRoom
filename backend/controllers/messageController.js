@@ -31,6 +31,18 @@ const sendMessage = asyncHandler(async (req, res) => {
       select: "name pic email",
     });
 
+    const chat = await Chat.findByIdAndUpdate(
+      chatId,
+      {
+        $inc: {
+          "unSeenMessages.$[elem].count": 1
+        }
+      },
+      {
+        arrayFilters: [{ "elem.user": { $ne: req.user._id } }], // Apply to all users except the sender
+        new: true
+      }
+    );
 
     await Chat.findByIdAndUpdate(
       req.body.chatId, 
@@ -207,13 +219,21 @@ const getAllPinnedMessage = asyncHandler(async (req, res) => {
 });
 
 const markAsSeen=asyncHandler(async(req,res)=>{
-  const {messageId,userId}=req.body
+  const {messageId,userId,chatId}=req.body
   try {
     const message = await Message.findByIdAndUpdate(
         messageId,
       { $addToSet: { isReadByAll: userId } },
       { new: true }
     );
+    await Chat.findOneAndUpdate(
+      { _id: chatId, "unSeenMessages.user": userId, "unSeenMessages.count": { $gt: 0 } }, // Ensure the count is greater than 0
+      {
+        $inc: { "unSeenMessages.$.count": -1 } // Decrement the unseen message count
+      },
+      { new: true }
+    );
+
       res.status(200).send({message:message})
       console.log(message)
   } catch (error) {

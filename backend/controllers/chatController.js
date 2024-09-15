@@ -97,7 +97,12 @@ const createGroupChat = async (req, res) => {
       isGroupChat: true,
       groupAdmin: req.user,
       description:req.body.description,
-      groupPic:req.body.groupPic
+      groupPic:req.body.groupPic,
+      unSeenMessages: users.map(user => ({
+        user: user,   // For each user in the group
+        count: 0      // Initialize unseen messages count to 0
+      }))
+    
     });
 
     const populateGroupChat = await Chat.findOne({ _id: groupChat._id })
