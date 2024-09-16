@@ -30,12 +30,12 @@ const ChatSchema = new mongoose.Schema(
         },
       },
     ],
-    groupPic:{
-      type:String
+    groupPic: {
+      type: String,
     },
-    description:{
-      type:String
-    }
+    description: {
+      type: String,
+    },
   },
   {
     timestamps: true,

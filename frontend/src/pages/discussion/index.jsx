@@ -100,6 +100,25 @@ const Discussions = () => {
   const [groupDocument,setGroupDocument]=useState([])
   const [editGroupName,setEditGroupName]=useState(null)
   const [editGroupDescription,setEditGroupDescription]=useState(null)
+  const [unReadGroups,setUnReadGroups]=useState([])
+  const [openUnReadGroups,setOpenUnReadGroups]=useState(false)
+
+  useEffect(() => {
+  
+    const updatedUnReadGroups = groups.map((group) => {
+      const loggedInUserId = JSON.parse(localStorage.getItem('user'))._id; 
+      const unseenMessage = group.unSeenMessages.find(
+        (unseen) => unseen.user === loggedInUserId
+      );
+      return {
+        ...group, 
+        unreadCount: unseenMessage ? unseenMessage.count : 0,
+      };
+    }).filter(group => group.unreadCount > 0);
+
+    setUnReadGroups(updatedUnReadGroups);
+    console.log(unReadGroups,'rakazone')
+  }, [groups]);
 
   const ReasonsToReport=[
     "Hate speech or symbols",
@@ -263,13 +282,14 @@ const Discussions = () => {
 
   // Send a new message
   const sendMessage = async (messageType) => {
-    console.log('faltu')
+    const userId=JSON.parse(localStorage.getItem('user'))._id
     try {
       if (editMessage) {
         console.log(newMessage,"faltu1")
         const response = await axios.put("/api/message/edit", {
           messageId: editMessage._id,
           content: newMessage,
+          userId:userId
         });
         setChatMessage((message) => {
           return message.map((item) =>
@@ -301,6 +321,7 @@ const Discussions = () => {
                 content: null,
                 link: fileUrl,
                 messageType: file[0].type,
+                userId:userId
             });
             setChatMessage((prevMessages) => [response.data,...prevMessages]);
             socket.current.emit("newMessage", response.data);
@@ -316,6 +337,7 @@ const Discussions = () => {
           chatId: groupChatRoom?._id,
           content:  `${JSON.parse(localStorage.getItem('user')).username} has left the group`,
           messageType:"left",
+          userId:userId
         });
   
         setChatMessage((prevMessages) => [response.data,...prevMessages]);
@@ -344,6 +366,7 @@ const Discussions = () => {
           messageType:"text",
           link: null,
           replyMessage: replyMessage,
+          userId:userId
         });
         setChatMessage((prevMessages) => [response.data,...prevMessages]);
         socket.current.emit("newMessage", response.data);
@@ -380,35 +403,49 @@ const Discussions = () => {
       console.log("New message received:", newMessageReceived);
       console.log("Current chat room ID:", groupChatRoom?._id);
       console.log("Received message's chat ID:", newMessageReceived.chat?._id);
-
-      if (groupChatRoom && groupChatRoom?._id === newMessageReceived.chat?._id
-      ) {
-        setChatMessage((prevMessages) => [newMessageReceived,...prevMessages, ]);
+  
+      // If the message is for the current chat, update the chat messages
+      if (groupChatRoom && groupChatRoom?._id === newMessageReceived.chat?._id) {
+        setChatMessage((prevMessages) => [newMessageReceived, ...prevMessages]);
       } else {
         console.log("Message received in a different chat.");
       }
-
-      setGroups((prevMessages) => 
-        prevMessages.map((message) => {
-          if (message._id === newMessageReceived.chat._id) {
+  
+      // Update the 'groups' state, particularly 'unSeenMessages' and 'latestMessage'
+      setGroups((prevGroups) =>
+        prevGroups.map((group) => {
+          if (group._id === newMessageReceived.chat._id) {
+            
+            // Update unSeenMessages for everyone except the sender
+            const updatedUnSeenMessages = group.unSeenMessages.map((unseen) => {
+              if (unseen.user !== newMessageReceived.sender._id) {
+                return { ...unseen, count: unseen.count + 1 }; // Increment unseen count for everyone except the sender
+              }
+              return unseen;
+            });
+  
+            // Return the updated group with the new latest message and unseen messages
             return {
-              ...message,
-              unSeenMessage: message.unSeenMessage + 1,
-              latestMessage:newMessageReceived
+              ...group,
+              latestMessage: newMessageReceived, // Update latestMessage for everyone
+              unSeenMessages: updatedUnSeenMessages,
             };
-          } else {
-            return message;
           }
+          return group; // Return group as is if no match
         })
       );
+      console.log("Updated groups:", groups);
     };
-
+  
+    // Listen for the "message received" event from socket
     socket.current.on("message received", handleMessageReceived);
-
+  
+    // Cleanup the socket event listener when the component unmounts or groupChatRoom changes
     return () => {
       socket.current.off("message received", handleMessageReceived);
     };
-  }, [groupChatRoom]);
+  }, [groupChatRoom, setChatMessage, setGroups]);
+  
 
   useEffect(() => console.log(groups,'lol'), [groups]);
 
@@ -758,20 +795,45 @@ const Discussions = () => {
       const response = await axios.put(`/api/message/seen`, {
         messageId: messageId,
         userId: userId,
-        chatId:groupChatRoom?._id
+        chatId: groupChatRoom?._id, // Pass the current chat room ID
       });
+  
+      // Update the chat messages to reflect the seen status
       setChatMessage((messages) =>
         messages.map((message) =>
           message?._id === response?.data?.message?._id
             ? { ...message, isReadByAll: [...message.isReadByAll, userId] }
             : message
         )
-      )
-      
+      );
+  
+      // Update the unseen messages count in the group
+      setGroups((prevGroups) =>
+        prevGroups.map((group) => {
+          if (group._id === groupChatRoom?._id) {
+            const updatedUnSeenMessages = group.unSeenMessages.map((unseen) => {
+              // Reset the count to 0 for the user who has seen the message
+              if (unseen.user === userId) {
+                return { ...unseen, count: 0 };
+              }
+              return unseen; // Return the unchanged unseen message for other users
+            });
+  
+            // Return the updated group
+            return {
+              ...group,
+              unSeenMessages: updatedUnSeenMessages,
+            };
+          }
+          return group; // Return the group unchanged if it doesn't match the current chat room
+        })
+      );
+  
     } catch (error) {
-      console.log(error);
+      console.log("Error in markAsSeen:", error);
     }
   };
+  
 
   const handleGroupOpen = (group) => {
     setGroupChatRoom(group);
@@ -951,6 +1013,7 @@ const Discussions = () => {
                           className="flex  data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px]  hover:rounded-tl-2xl  "
                           onClick={() => {
                             setOpenDraft(false);
+                            setOpenUnReadGroups(false)
                           }}
                         >
                           <AllChats />
@@ -958,7 +1021,7 @@ const Discussions = () => {
                         </div>
                       </MenuItem>
                       <MenuItem>
-                        <div className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] border-y border-[#D7D7D8] ">
+                        <div className="flex data-[focus]:bg-blue-100 gap-[12px] p-[16px] pr-[24px] border-y border-[#D7D7D8] " onClick={()=>setOpenUnReadGroups(true)}>
                           <UnreadMessageIcon />
                           Unread Chats
                         </div>
@@ -1023,7 +1086,7 @@ const Discussions = () => {
               className=" "
               height={"60vh"}
             >
-              {groups &&
+              {groups && !openUnReadGroups &&
                 !openDraft &&
                 groups.map((group, index) => {
                   console.log('copy',group)
@@ -1068,18 +1131,22 @@ const Discussions = () => {
                             </p>
                             {(group.unSeenMessages || []).map((unSeenMessage) => {
                               const loggedInUserId = JSON.parse(localStorage.getItem('user'))._id; // Get logged-in user ID
-                            console.log(loggedInUserId,unSeenMessage.user,'copy',group.unSeenMessage)
+
                               // Check if the user ID matches the logged-in user
-                              if (unSeenMessage.user === loggedInUserId) {
+                              if (unSeenMessage.user === loggedInUserId && unSeenMessage.count > 0) {
                                 return (
-                                  <div key={unSeenMessage.user} className="bg-[#1660CD] text-[10px] text-white rounded-lg py-[6px] px-[8px] max-h-[20px] max-w-[22px] flex items-center ">
+                                  <div
+                                    key={unSeenMessage.user}
+                                    className="bg-[#1660CD] text-[10px] text-white rounded-lg py-[6px] px-[8px] max-h-[20px] max-w-[22px] flex items-center"
+                                  >
                                     {unSeenMessage.count} {/* Display the unseen message count */}
                                   </div>
                                 );
                               }
 
-  return null; // Return null if the user does not match
-})}
+                              return null; // Return null if the user does not match or count is 0
+                            })}
+
                           </div>
                         </div>
                       </p>
@@ -1111,6 +1178,71 @@ const Discussions = () => {
                                 }`
                               : group.groupChatRoom.latestMessage?.content}
                           </p>
+                        </div>
+                      </p>
+                    </div>
+                  );
+                })}
+                {openUnReadGroups && unReadGroups.map((group, index) => {
+                  console.log('copy',group)
+                  return (
+                    <div key={index}>
+                      <p
+                        className={` ${
+                          groupChatRoom?._id == group?._id && "bg-[#E8EFFA] "
+                        } cursor-pointer p-[12px] rounded-xl flex gap-[12px] `}
+                        onClick={() => {
+                          handleGroupOpen(group);
+                          handleSelectedMenu("about")
+                          setOpenGroupMenu(false)
+                        }}
+                      >
+                        <img
+                          src={group.groupAdmin.pic}
+                          className=" w-[48px] h-[48px] rounded-full "
+                        />
+                        <div className=" w-full ">
+                          <div className=" flex justify-between w-full items-center ">
+                            <p className=" font-medium text-base text-[#16171C] ">
+                              {group?.chatName}
+                            </p>
+                            <p className=" text-[#949497] text-[12px] leading-[18px] ">
+                              {getTimeAgo(group?.latestMessage?.createdAt)}
+                            </p>
+                          </div>
+                          <div className=" flex w-full justify-between ">
+                            <p className=" text-[#57585C] ">
+                              {draftMessages && draftMessages[group?._id] ? (
+                                <p>
+                                  <span className=" text-[#1660CD] font-medium  ">
+                                    Draft:
+                                  </span>{" "}
+                                  {draftMessages[group?._id]?.draftMessage}
+                                </p>
+                              ) : (
+                                group?.latestMessage?.content?.length >25 ? group?.latestMessage?.content.substring(0,25)+`...` : group?.latestMessage?.content ??
+                                "Start a converstion"
+                              )}
+                            </p>
+                            {(group.unSeenMessages || []).map((unSeenMessage) => {
+                              const loggedInUserId = JSON.parse(localStorage.getItem('user'))._id; // Get logged-in user ID
+
+                              // Check if the user ID matches the logged-in user
+                              if (unSeenMessage.user === loggedInUserId && unSeenMessage.count > 0) {
+                                return (
+                                  <div
+                                    key={unSeenMessage.user}
+                                    className="bg-[#1660CD] text-[10px] text-white rounded-lg py-[6px] px-[8px] max-h-[20px] max-w-[22px] flex items-center"
+                                  >
+                                    {unSeenMessage.count} {/* Display the unseen message count */}
+                                  </div>
+                                );
+                              }
+
+                              return null; // Return null if the user does not match or count is 0
+                            })}
+
+                          </div>
                         </div>
                       </p>
                     </div>

@@ -5,7 +5,7 @@ const Chat = require("../Models/chatModal");
 const User = require("../Models/userSchema");
 
 const sendMessage = asyncHandler(async (req, res) => {
-  const { content, chatId, link, messageType, replyTo,replyMessage } = req.body;
+  const { content, chatId, link, messageType, replyTo, replyMessage, userId } = req.body;
 
   var newMessage = {
     sender: req.user._id,
@@ -16,7 +16,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     replyTo: replyTo,
     isDeleted: false,
     isDeletedForEveryOne: false,
-    replyMessage:replyMessage,
+    replyMessage: replyMessage,
     isPinned: false,
     isStarred: [],
   };
@@ -31,33 +31,37 @@ const sendMessage = asyncHandler(async (req, res) => {
       select: "name pic email",
     });
 
-    const chat = await Chat.findByIdAndUpdate(
+    // Update unseen message count for all users except the sender (logged-in user)
+    await Chat.findByIdAndUpdate(
       chatId,
       {
         $inc: {
-          "unSeenMessages.$[elem].count": 1
+          "unSeenMessages.$[elem].count": 1,  // Increment unseen message count
         }
       },
       {
-        arrayFilters: [{ "elem.user": { $ne: req.user._id } }], // Apply to all users except the sender
+        arrayFilters: [{ "elem.user": { $ne: userId } }],  // Exclude the logged-in user from the update
         new: true
       }
     );
 
+    // Update the latest message in the chat
     await Chat.findByIdAndUpdate(
-      req.body.chatId, 
-        {
-          latestMessage: message,
-          $inc:{unSeenMessage:1}
-        },
-        { new: true }
-      );
+      chatId, 
+      {
+        latestMessage: message,
+      },
+      { new: true }
+    );
 
     res.json(message);
   } catch (error) {
-    res.status(400);
+    res.status(400).json({ message: "Failed to send message", error });
   }
 });
+
+
+
 
 const allMessage = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
@@ -218,28 +222,41 @@ const getAllPinnedMessage = asyncHandler(async (req, res) => {
   }
 });
 
-const markAsSeen=asyncHandler(async(req,res)=>{
-  const {messageId,userId,chatId}=req.body
+const markAsSeen = asyncHandler(async (req, res) => {
+  const { messageId, userId, chatId } = req.body;
+
   try {
+    // Step 1: Mark the message as read by the user (add userId to isReadByAll array)
     const message = await Message.findByIdAndUpdate(
-        messageId,
-      { $addToSet: { isReadByAll: userId } },
+      messageId,
+      { $addToSet: { isReadByAll: userId } }, // Ensure no duplicate user entries
       { new: true }
     );
-    await Chat.findOneAndUpdate(
-      { _id: chatId, "unSeenMessages.user": userId, "unSeenMessages.count": { $gt: 0 } }, // Ensure the count is greater than 0
+
+    // Step 2: Decrement the unseen message count for the specific user in the chat
+    const chat = await Chat.findOneAndUpdate(
+      { _id: chatId, "unSeenMessages.user": userId, "unSeenMessages.count": { $gt: 0 } }, // Match chat by chatId and ensure unseen count > 0
       {
-        $inc: { "unSeenMessages.$.count": -1 } // Decrement the unseen message count
+        $inc: { "unSeenMessages.$.count": -1 } // Decrement the unseen message count for the user
       },
       { new: true }
     );
 
-      res.status(200).send({message:message})
-      console.log(message)
+    if (!chat) {
+      return res.status(404).json({ message: "Chat or unseen messages not found" });
+    }
+
+    // Send response back with the updated message and chat
+    res.status(200).send({ message, chat });
+    console.log("Updated message:", message);
+    console.log("Updated chat:", chat);
+
   } catch (error) {
-      console.log(error)
+    console.error("Error marking message as seen:", error);
+    res.status(500).send({ message: "An error occurred" });
   }
-})
+});
+
 
 const groupMedia = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
