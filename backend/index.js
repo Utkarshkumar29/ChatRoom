@@ -61,10 +61,6 @@ const io = new Server(server, {
     }
 });
 
-module.exports = (req, res) => {
-    res.status(200).json({ message: "Hello from the backend!" });
-  };
-
 // Socket.IO Event Handling
 io.on("connection", (socket) => {
     
