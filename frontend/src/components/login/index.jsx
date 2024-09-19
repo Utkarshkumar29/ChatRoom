@@ -13,7 +13,7 @@ const Login = () => {
   const handleLogin = async () => {
     const data = { email, password };
     try {
-      const response = await axios.post('api/user/login', data);
+      const response = await axios.post('https://chatroom-backend-32xg.onrender.com/api/user/login', data);
       setUser(response.data.userDocs);
       localStorage.setItem('user',JSON.stringify(response.data.userDocs))
       setToken(response.data.token)

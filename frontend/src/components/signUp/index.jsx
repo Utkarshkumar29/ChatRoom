@@ -22,7 +22,7 @@ const SignUp = () => {
                 email,
                 password
             } 
-            const response=await axios.post('api/user',data)
+            const response=await axios.post('https://chatroom-backend-32xg.onrender.com/api/user',data)
             if(response.status==200){
                 toast("Sign Up successfully")
             }

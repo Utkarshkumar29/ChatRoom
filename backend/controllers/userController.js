@@ -1,6 +1,6 @@
 const asyncHandler = require('express-async-handler');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const User = require('../Models/userSchema');  // Make sure this path is correct
 
 const authUser = asyncHandler(async (req, res) => {
@@ -51,16 +51,20 @@ const registerUser=asyncHandler(async(req,res)=>{
     }
 });
 
-const searchUser=asyncHandler(async(req,res)=>{
-    const keyword=req.query.search ? {
-        $or: [
-            { username: { $regex:req.query.search, $options: 'i' }},
-            { email: { $regex:req.query.search, $options: 'i' }} 
-        ]
-    }:{}
-    console.log(req.user._id)
-    const users=await User.find(keyword).find({_id: {$ne:req.user._id}})
-    res.status(200).send(users)
-})
+const searchUser = asyncHandler(async (req, res) => {
+    const searchQuery = req.query.search
+    if (!searchQuery) {
+      return res.status(200).send([])
+    }
+    const keyword = {
+      $or: [
+        { username: { $regex: searchQuery, $options: 'i' } },
+        { email: { $regex: searchQuery, $options: 'i' } },
+      ],
+    };
+    const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
+    res.status(200).send(users);
+  });
+  
 
 module.exports = { authUser, registerUser, searchUser };

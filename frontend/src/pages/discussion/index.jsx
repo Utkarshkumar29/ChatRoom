@@ -58,6 +58,7 @@ import AlertIcon from "../../assets/icons/AlertIcon";
 import DoctIcon from "../../assets/icons/DoctIcon";
 import ClassicSpinner from "../../components/loader/ClassicSpinner";
 import TickIcon from "../../assets/icons/TickIcon";
+import NullImage from "../../assets/Null.svg"
 
 
 const Discussions = () => {
@@ -102,6 +103,8 @@ const Discussions = () => {
   const [editGroupDescription,setEditGroupDescription]=useState(null)
   const [unReadGroups,setUnReadGroups]=useState([])
   const [openUnReadGroups,setOpenUnReadGroups]=useState(false)
+  const [addMember,setAddMember]=useState(false)
+  const [addMemberList,setAddMemberList]=useState([])
 
   useEffect(() => {
   
@@ -187,7 +190,7 @@ const Discussions = () => {
   // Search for users
   const handleSearch = async (keyword) => {
     try {
-      const response = await axios.get(`/api/user?search=${keyword}`);
+      const response = await axios.get(`https://chatroom-backend-32xg.onrender.com/api/user?search=${keyword}`);
       setUserList(response.data);
     } catch (error) {
       console.error("Error searching users:", error);
@@ -204,7 +207,7 @@ const Discussions = () => {
       groupPic: fileUrl,
     };
     try {
-      const response = await axios.post("/api/chats/group", data);
+      const response = await axios.post("https://chatroom-backend-32xg.onrender.com/api/chats/group", data);
       setOpenDiscussionModal(false); // Close modal after creation
       accessChat(); // Refresh chat list after creating a room
       setFileUrl("")
@@ -213,10 +216,58 @@ const Discussions = () => {
     }
   };
 
+  const addMembers = async () => {
+    try {
+      const data = {
+        chatId: groupChatRoom?._id,
+        userIds: addMemberList, // Assuming addMemberList is an array of user IDs
+      };
+  
+      const response = await axios.put(`https://chatroom-backend-32xg.onrender.com/api/chats/groupadd`, data);
+      console.log('Response Data:', response.data); // Log the entire response for debugging
+  
+      // Assuming the response contains the updated groupChatRoom object
+      const updatedGroupChatRoom = response.data; // Adjust based on actual response structure
+  
+      // Update the group chat room state with the new users
+      setGroupChatRoom((prevGroup) => {
+        // Create a new users array that combines existing users with the updated ones
+        const updatedUsers = updatedGroupChatRoom.users; // This should be the updated users array from the response
+  
+        return {
+          ...prevGroup,
+          users: updatedUsers,
+        };
+      });
+      setUserList([])
+      setAddMemberList([])
+    } catch (error) {
+      console.error(error);
+    }
+  };
+  
+
+  const handleRemoveMember=async(userId)=>{
+    try {
+      const data={
+        userId:userId,
+        chatId:groupChatRoom._id
+      }
+        const response=await axios.put(`https://chatroom-backend-32xg.onrender.com/api/chats/groupremove`,data)
+        console.log(response)
+        setGroupChatRoom((prevGroup) => ({
+          ...prevGroup,
+          users: prevGroup.users.filter((user) => user._id !== userId),
+        }));
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   // Fetch chat groups
   const accessChat = async () => {
     try {
-      const response = await axios.get("/api/chats");
+      const response = await axios.get("https://chatroom-backend-32xg.onrender.com/api/chats");
       const filterGroups = response.data.filter(
         (group) => group.isGroupChat === true
       );
@@ -286,7 +337,7 @@ const Discussions = () => {
     try {
       if (editMessage) {
         console.log(newMessage,"faltu1")
-        const response = await axios.put("/api/message/edit", {
+        const response = await axios.put("https://chatroom-backend-32xg.onrender.com/api/message/edit", {
           messageId: editMessage._id,
           content: newMessage,
           userId:userId
@@ -316,7 +367,7 @@ const Discussions = () => {
         console.log(fileUrl)
           // Send message with file URL
           if (groupChatRoom?._id && fileUrl && file?.[0]?.type) {
-            const response = await axios.post("/api/message", {
+            const response = await axios.post("https://chatroom-backend-32xg.onrender.com/api/message", {
                 chatId: groupChatRoom._id,
                 content: null,
                 link: fileUrl,
@@ -333,7 +384,7 @@ const Discussions = () => {
       } else if(messageType=="left"){
         console.log(newMessage,"faltu3")
   
-        const response = await axios.post("/api/message", {
+        const response = await axios.post("https://chatroom-backend-32xg.onrender.com/api/message", {
           chatId: groupChatRoom?._id,
           content:  `${JSON.parse(localStorage.getItem('user')).username} has left the group`,
           messageType:"left",
@@ -359,7 +410,7 @@ const Discussions = () => {
         setReplyMessage(null)
       } else {
         console.log("faltu4")
-        const response = await axios.post("/api/message", {
+        const response = await axios.post("https://chatroom-backend-32xg.onrender.com/api/message", {
           chatId: groupChatRoom?._id,
           content: newMessage,
           replyTo: replyTo,
@@ -454,7 +505,7 @@ const Discussions = () => {
   const fetchChats = async () => {
     try {
       const response = await axios.get(
-        `/api/message/${groupChatRoom?._id}?page=1&limit=10`
+        `https://chatroom-backend-32xg.onrender.com/api/message/${groupChatRoom?._id}?page=1&limit=10`
       );
       setChatMessage(response.data.results);
       setChatCount(response.data.count);
@@ -563,7 +614,7 @@ const Discussions = () => {
 
   const deleteMessage = async (deleteMsg, deleteForEveryone) => {
     try {
-      const response = await axios.put("/api/message", {
+      const response = await axios.put("https://chatroom-backend-32xg.onrender.com/api/message", {
         messageId: selectedMessage?._id,
         deleteMsg: deleteMsg,
         deleteForEveryone: deleteForEveryone,
@@ -626,7 +677,7 @@ const Discussions = () => {
   //star messages======================================================
   const handleStarMessage = async (data, isStarred) => {
     try {
-      const response = await axios.put(`/api/message/star`, {
+      const response = await axios.put(`https://chatroom-backend-32xg.onrender.com/api/message/star`, {
         messageId: data?._id,
         userId: user?._id,
         isStarred: isStarred,
@@ -647,7 +698,7 @@ const Discussions = () => {
 
   const getStarMessage = async () => {
     try {
-      const response = await axios.get(`/api/message/star`);
+      const response = await axios.get(`https://chatroom-backend-32xg.onrender.com/api/message/star`);
 
       setStarredMessages(response.data.messages);
     } catch (error) {
@@ -664,7 +715,7 @@ const Discussions = () => {
   const getPinnedMessages = async () => {
     try {
       const response = await axios.get(
-        `/api/message/pinnedmessages/${groupChatRoom?._id}`
+        `https://chatroom-backend-32xg.onrender.com/api/message/pinnedmessages/${groupChatRoom?._id}`
       );
       setPinnedMessages(response.data);
     } catch (error) {
@@ -680,7 +731,7 @@ const Discussions = () => {
 
   const handlePinMessage = async (data) => {
     try {
-      const response = await axios.put(`/api/message/pinnedmessages`, {
+      const response = await axios.put(`https://chatroom-backend-32xg.onrender.com/api/message/pinnedmessages`, {
         messageId: data?._id,
         pinStatus: data.isPinned,
       });
@@ -792,7 +843,7 @@ const Discussions = () => {
 
   const markAsSeen = async (messageId, userId) => {
     try {
-      const response = await axios.put(`/api/message/seen`, {
+      const response = await axios.put(`https://chatroom-backend-32xg.onrender.com/api/message/seen`, {
         messageId: messageId,
         userId: userId,
         chatId: groupChatRoom?._id, // Pass the current chat room ID
@@ -871,7 +922,7 @@ const Discussions = () => {
       return;
     }
     try {
-      const response = await axios.delete(`/api/chats/${groupChatRoom?._id}`);    
+      const response = await axios.delete(`https://chatroom-backend-32xg.onrender.com/api/chats/${groupChatRoom?._id}`);    
       if (response.status === 200) {
         console.log("Group chat deleted successfully.");
         await setGroups((prevGroups) => {
@@ -902,7 +953,7 @@ const Discussions = () => {
       userId:userId
     }
     try {
-      const response=await axios.put(`/api/chats/groupremove`,data)
+      const response=await axios.put(`https://chatroom-backend-32xg.onrender.com/api/chats/groupremove`,data)
         if(response.status==200){
           console.log("User removed from group successfully")
           setGroups((group)=>{
@@ -923,8 +974,8 @@ const Discussions = () => {
   }
 
   useEffect(()=>{
-    console.log(newMessage,'power')
-  },[newMessage])
+    console.log(addMemberList,'power')
+  },[addMemberList])
 
   const handleGroupNameChange = (e) => {
     setEditGroupName(e.target.value);
@@ -952,7 +1003,7 @@ const Discussions = () => {
     }
     console.log(data,'power')
     try {
-        const response=await axios.put(`/api/chats/group`,data)
+        const response=await axios.put(`https://chatroom-backend-32xg.onrender.com/api/chats/group`,data)
         if(response.status==200){
           console.log("Group updated successfully")
           if(editGroupDescription!=null){
@@ -978,6 +1029,7 @@ const Discussions = () => {
         console.log(error)
     }
   }
+  
 
 
   return (
@@ -1077,7 +1129,8 @@ const Discussions = () => {
                 display: 'flex', 
                 flexDirection: 'column', // Ensure items are in reverse order
                 overflowY: 'auto',// Enable vertical scrolling,
-                padding:"16px"
+                padding:"16px",
+                paddingTop:"0px",
               }}
               loader={<div className=" w-full h-[40px] bg-red-950 ">
                 <ClassicSpinner/>
@@ -1171,12 +1224,14 @@ const Discussions = () => {
                         <div>
                           <p>{group?.groupChatRoom.chatName}</p>
                           <p>
-                            {draftMessages[group.groupChatRoom?._id]
-                              ? `Draft: ${
-                                  draftMessages[group.groupChatRoom?._id]
-                                    ?.draftMessage
-                                }`
-                              : group.groupChatRoom.latestMessage?.content}
+                            {draftMessages[group.groupChatRoom?._id] ? (
+                              <>
+                                <span className="text-[#1660CD]">Draft:</span> 
+                                {` ${draftMessages[group.groupChatRoom._id]?.draftMessage}`}
+                              </>
+                            ) : (
+                              group.groupChatRoom.latestMessage?.content
+                            )}
                           </p>
                         </div>
                       </p>
@@ -1423,7 +1478,7 @@ const Discussions = () => {
                                     </Switch>
                                 </div>
                                 <div className=" py-[16px] px-[32px] flex gap-[16px] justify-center ">
-                                    {groupChatRoom?.groupAdmin._id==JSON.parse(localStorage.getItem('user'))._id? (
+                                    {groupChatRoom?.groupAdmin._id==JSON.parse(localStorage.getItem('user'))._id ? (
                                       <button onClick={()=>setDeleteRoomModal(true)} className=" cursor-pointer w-[220px] text-[#57585C] border border-[#57585C] py-[12px] px-[40px] rounded-2xl flex justify-center ">
                                       Delete Room
                                     </button>
@@ -1482,16 +1537,64 @@ const Discussions = () => {
                                 <p className="font-semibold text-[18px] leading-[27px]" >Members</p>
                                 <p className=" bg-[#949494] text-white flex justify-center items-center p-[9px] rounded-xl max-h-[25px] max-w-[25px] ">{groupChatRoom?.users.length}</p>
                                 </div>
+                                <div className=" flex items-center gap-[16px] px-[24px] pt-[24px] ">
+                                  <input onChange={(e) => handleSearch(e.target.value)} placeholder="Search " className=" p-[12px] border border-[#D7D7D8] bg-[#F2F3F5] rounded-xl h-[44px] outline-none w-full "/>
+                                  <p onClick={()=>addMembers()} className=" cursor-pointer items-center text-[14px] leading-[20px] font-medium py-[12px] pr-[20px] pl-[16px] bg-[#1660CD] whitespace-nowrap flex max-h-[44px] gap-[8px] rounded-2xl text-white "><PlusIcon width={16} height={16} iconColor={"#FFFFFF"} /> Add Members</p>
+                                </div>
+                                {addMemberList && (
+                                  <div className=" flex flex-wrap px-[16px] pt-[16px] gap-[8px] ">
+                                    {addMemberList.map((user)=>{
+                                      return(
+                                        <div className=" flex bg-[#E8EFFA] border border-[#D7D7D8] items-center rounded-xl py-[12px] px-[16px] gap-[16px] ">
+                                          <div className=" flex gap-[8px] items-center ">
+                                          <img src={user.pic} className=" w-[24px] h-[24px] rounded-full " />
+                                          <p className="  text-[14px] text-[#57585C] whitespace-nowrap  ">{user?.username}</p>
+                                          </div>
+                                        <span onClick={() => setAddMemberList(addMemberList.filter(member => member._id !== user._id))}><CloseIcon/></span>
+                                      </div>
+                                      )
+                                    })}
+                                  </div>
+                                )}
+                                {userList.map((user)=>{
+                                  return(
+                                    <div className=" flex gap-[16px] items-center px-[16px] pt-[16px] " onClick={() => setAddMemberList((prev) => {
+                                      const userExists = prev.some(member => member._id === user._id);
+                                      if (!userExists) {
+                                        return [...prev, user];
+                                      }
+                                      return prev;
+                                    })} >
+                                    <img src={user.pic} className=" w-[48px] h-[48px] rounded-full " />
+                                    <div> 
+                                      <p>{user?.username}</p>
+                                    </div>
+                                  </div>
+                                  )
+                                })}
                                 <div className=" flex flex-col p-[16px] gap-[16px] h-min ">
                                   {groupChatRoom?.users.map((user,index)=>{
                                     return(
-                                      <div className=" flex gap-[16px] items-center ">
+                                      <>
+                                      {!addMember ? (
+                                        <div className=" flex gap-[16px] items-center ">
                                         <img src={user.pic} className=" w-[48px] h-[48px] rounded-full " />
-                                        <div>
-                                          <p>{user.username}</p>
-                                          <p className=" border border-[#1660CD] flex justify-center items-center text-[#1660CD] rounded-lg py-[8px] px-[16px] max-h-[30px] font-medium text-[12px] leading-[18px] ">{groupChatRoom?.groupAdmin.username==user?.username ? "Admin":"Member"}</p>
+                                        <div className=" w-full ">
+                                          <div className=" flex w-full justify-between "><p>{user?.username}</p>
+                                          {localStorage.getItem('user') && groupChatRoom?.groupAdmin && JSON.parse(localStorage.getItem('user'))._id === groupChatRoom.groupAdmin._id && (
+  <p onClick={() => handleRemoveMember(user._id)} className="cursor-pointer">
+    <TrashIcon />
+  </p>
+)}</div>
+                                          <p className=" border border-[#1660CD] flex justify-center items-center text-[#1660CD] rounded-lg py-[8px] px-[16px] max-h-[30px] max-w-[72px] font-medium text-[12px] leading-[18px] ">{groupChatRoom?.groupAdmin.username==user?.username ? "Admin":"Member"}</p>
                                         </div>
                                       </div>
+                                      ):(
+                                        <div>
+                                          <input className=" outline-none "/>
+                                        </div>
+                                      )}
+                                      </>
                                     )
                                   })}
                                 </div>
@@ -1828,8 +1931,9 @@ const Discussions = () => {
             </div>
           </div>
         ) : (
-          <div className=" w-full h-full bg-white rounded-3xl border border-[#D7D7D8] flex justify-center items-center ">
-            Select a room
+          <div className=" flex flex-col gap-[32px] w-full h-full bg-white rounded-3xl border border-[#D7D7D8] flex justify-center items-center ">
+            <img src={NullImage} />
+            <p className=" text-[22px] leading-[33px] font-semibold ">Start a conversation with your friends</p>
           </div>
         )}
       </div>

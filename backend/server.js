@@ -48,8 +48,9 @@ app.get("/chat/:id", (req, res) => {
     res.send(relatedChats);
 });
 
+const PORT = process.env.PORT || 5000; 
 // Server and Socket.IO Initialization
-const server = app.listen(5000, () => {
+const server = app.listen(PORT, () => {
     console.log("Server running on port 5000");
 });
 
@@ -59,6 +60,10 @@ const io = new Server(server, {
         origin: "http://localhost:3000"
     }
 });
+
+module.exports = (req, res) => {
+    res.status(200).json({ message: "Hello from the backend!" });
+  };
 
 // Socket.IO Event Handling
 io.on("connection", (socket) => {

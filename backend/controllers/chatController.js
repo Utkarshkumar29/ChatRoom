@@ -155,12 +155,13 @@ const renameGroupChat=asyncHandler(async(req,res)=>{
 })
 
 const addToGroup=asyncHandler(async(req,res)=>{
-  const {chatId,userId}=req.body
+  const {chatId,userIds}=req.body
+  console.log(userIds)
   try {
       const added=await Chat.findByIdAndUpdate(
         chatId,
         {
-          $push:{users:userId},
+          $push:{users:userIds},
         },
         {
           new:true
@@ -173,7 +174,7 @@ const addToGroup=asyncHandler(async(req,res)=>{
         res.status(404)
         throw new Error("Chat not found")
       }else{  
-        res.json(added)
+        res.status(200).json(added)
       }
 
   } catch (error) {
