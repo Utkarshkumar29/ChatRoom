@@ -143,7 +143,7 @@ const Discussions = () => {
 
   const fetchGroupMedia=async()=>{
     try {
-      const response = await axios.get(`api/message/groupMedia/${groupChatRoom._id}`, {
+      const response = await axios.get(`https://chatroom-y7ou.onrender.com/api/message/groupMedia/${groupChatRoom._id}`, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
         },
@@ -156,7 +156,7 @@ const Discussions = () => {
 
   const fetchGroupDocument=async()=>{
     try {
-      const response=await axios.get(`api/message/groupDocument/${groupChatRoom._id}`, {
+      const response=await axios.get(`https://chatroom-y7ou.onrender.com/api/message/groupDocument/${groupChatRoom._id}`, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
         },

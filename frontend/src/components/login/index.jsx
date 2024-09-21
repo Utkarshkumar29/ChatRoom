@@ -15,7 +15,7 @@ const Login = () => {
   const handleLogin = async () => {
     const data = { email, password };
     try {
-      const response = await axios.post('api/user/login', data);
+      const response = await axios.post('https://chatroom-y7ou.onrender.com/api/user/login', data);
       setUser(response.data.userDocs);
       localStorage.setItem('user',JSON.stringify(response.data.userDocs))
       localStorage.setItem('token',response.data.token)
@@ -50,7 +50,7 @@ const Login = () => {
       };
   
       // Send data to backend for auth or signup
-      const response = await axios.post('/api/user/google-auth', data);
+      const response = await axios.post('https://chatroom-y7ou.onrender.com/api/user/google-auth', data);
   
       if (response.status === 200 || response.status === 201) {
         console.log("Response from backend:", response.data);
