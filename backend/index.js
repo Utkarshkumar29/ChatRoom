@@ -17,7 +17,7 @@ require('dotenv').config();
 app.use(express.json());
 app.use(
     cors({
-      origin: "http://localhost:3000", // Explicitly specify the allowed origin
+      origin: "https://chat-room-fscl.vercel.app/", // Explicitly specify the allowed origin
       credentials: true, // Important for cookies, authorization headers with HTTPS
       methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       allowedHeaders: [
