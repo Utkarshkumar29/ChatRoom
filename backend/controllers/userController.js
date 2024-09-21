@@ -65,6 +65,52 @@ const searchUser = asyncHandler(async (req, res) => {
     const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });
     res.status(200).send(users);
   });
-  
+    
 
-module.exports = { authUser, registerUser, searchUser };
+  const GoogleAuth = asyncHandler(async (req, res) => {
+    const { username, email, pic, token } = req.body; // Expecting these from the client
+
+    try {
+        // Check if the user already exists
+        console.log('lol',token)
+        let userDocs = await User.findOne({ email: email });
+        if (userDocs) {
+            // User already exists, return user info
+            jwt.sign({
+                username: userDocs.username,
+                email: userDocs.email,
+                id: userDocs._id,
+            }, process.env.JWT_SECRET, {}, (err, token) => {
+                if (err) throw err;                    
+                res.status(200).cookie('token', token).send({userDocs,token});
+            });
+            return
+        } else {
+            // Create a new user if they don't exist
+            userDocs = new User({
+                username,
+                email,
+                password: "google", // Default password for OAuth users
+                googleId: token,
+                pic
+            });
+
+            const response = await userDocs.save();
+            jwt.sign({
+                username:username,
+                email:email,
+                id:response
+            },process.env.JWT_SECRET,{},(err,token)=>{
+                if(err) throw err
+                res.status(201).cookie('token',token,{httpOnly:true}).send({userDocs,token})
+            })
+        }
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
+
+
+module.exports = { authUser, registerUser, searchUser,GoogleAuth };

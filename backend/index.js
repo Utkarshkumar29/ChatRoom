@@ -15,12 +15,21 @@ const Chat = require('./Models/chatModal');
 require('dotenv').config();
 
 app.use(express.json());
-const corsOptions = {
-    origin: 'http://localhost:3000',
-    credentials: true,
-};
-
-app.use(cors(corsOptions));
+app.use(
+    cors({
+      origin: "http://localhost:3000", // Explicitly specify the allowed origin
+      credentials: true, // Important for cookies, authorization headers with HTTPS
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      allowedHeaders: [
+        "Origin",
+        "Content-Type",
+        "Accept",
+        "Authorization",
+        "X-Request-With",
+      ],
+    })
+  );
+  
 app.use(cookieParser());
 
 mongoose.connect('mongodb+srv://MERN:OabOhihuXOjL2fRB@cluster0.tiglnj5.mongodb.net/chats?retryWrites=true&w=majority&appName=Cluster0', {

@@ -2,7 +2,9 @@ import axios from "axios";
 import { useContext, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
-import { auth, provider, signInWithPopup } from "../../firebase/auth";
+import { auth, provider, signInWithGoogle, signInWithPopup } from "../../firebase/auth";
+import { toast } from "react-toastify";
+import { GoogleAuthProvider } from 'firebase/auth';
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,11 +15,11 @@ const Login = () => {
   const handleLogin = async () => {
     const data = { email, password };
     try {
-      const response = await axios.post('https://chatroom-backend-32xg.onrender.com/api/user/login', data);
+      const response = await axios.post('api/user/login', data);
       setUser(response.data.userDocs);
       localStorage.setItem('user',JSON.stringify(response.data.userDocs))
-      setToken(response.data.token)
-      console.log(response);
+      localStorage.setItem('token',response.data.token)
+      console.log(response.data.token,'power');
       if (response.status === 200) {
         setIsLoggedIn(true);
       }
@@ -27,19 +29,47 @@ const Login = () => {
     }
   };
 
-  const handleSignIn = async () => {
+  const handleGoogleAuth = async () => {
     try {
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-      console.log('User info:', user);
-
-      setUser(user);
-      setToken(result.token)
-      setIsLoggedIn(true);
+      const userCredential = await signInWithGoogle();
+      const user = userCredential.user; // User information
+      const username = user.displayName || "User";
+      const email = user.email;
+      const pic = user.photoURL;
+  
+      // Ensure the token retrieval is correct
+      const token = await user.getIdToken(); 
+  
+      console.log('Token:', token); // Log the token for debugging
+  
+      const data = {
+        username,
+        email,
+        pic,
+        token
+      };
+  
+      // Send data to backend for auth or signup
+      const response = await axios.post('/api/user/google-auth', data);
+  
+      if (response.status === 200 || response.status === 201) {
+        console.log("Response from backend:", response.data);
+        setUser(response.data.userDocs);
+        localStorage.setItem('user', JSON.stringify(response.data.userDocs));
+        setToken(response.data.token); // This should be your backend's token
+        setIsLoggedIn(true);
+        toast.success(`Welcome ${username}`);
+      } else {
+        toast.error("Unexpected response from server.");
+      }
     } catch (error) {
-      console.error('Error signing in:', error.message);
+      console.error("Google sign-in error: ", error);
+      toast.error("Google Sign In failed. Please try again.");
     }
   };
+
+ 
+
 
   if (isLoggedIn) {
     return <Navigate to="/chatRoom" />;
@@ -68,7 +98,7 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
       </div>
-      <button onClick={handleSignIn}>
+      <button onClick={handleGoogleAuth}>
         Sign in with Google
       </button>
       <button onClick={handleLogin}>Login</button>

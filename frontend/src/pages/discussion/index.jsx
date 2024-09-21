@@ -71,7 +71,7 @@ const Discussions = () => {
   const [groupChatRoom, setGroupChatRoom] = useState(null);
   const [newMessage, setNewMessage] = useState("");
   const [chatMessage, setChatMessage] = useState([]);
-  const { user, token } = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [socketConnected, setSocketConnected] = useState(false);
   const [chatcount, setChatCount] = useState(null);
   const [hasMoreData, setHasMoreData] = useState(false);
@@ -106,6 +106,9 @@ const Discussions = () => {
   const [addMember,setAddMember]=useState(false)
   const [addMemberList,setAddMemberList]=useState([])
 
+  const token = localStorage.getItem('token');  
+  console.log(token,'motel')
+
   useEffect(() => {
   
     const updatedUnReadGroups = groups.map((group) => {
@@ -138,7 +141,11 @@ const Discussions = () => {
 
   const fetchGroupMedia=async()=>{
     try {
-      const response=await axios.get(`api/message/groupMedia/${groupChatRoom._id}`)
+      const response=await axios.get(`api/message/groupMedia/${groupChatRoom._id}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    })
       setGroupMedia(response.data)
     } catch (error) {
         console.log(error)
@@ -147,7 +154,11 @@ const Discussions = () => {
 
   const fetchGroupDocument=async()=>{
     try {
-      const response=await axios.get(`api/message/groupDocument/${groupChatRoom._id}`)
+      const response=await axios.get(`api/message/groupDocument/${groupChatRoom._id}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    })
       setGroupDocument(response.data)
       console.log(response.data,'trying')
     } catch (error) {
@@ -190,7 +201,11 @@ const Discussions = () => {
   // Search for users
   const handleSearch = async (keyword) => {
     try {
-      const response = await axios.get(`https://chatroom-backend-32xg.onrender.com/api/user?search=${keyword}`);
+      const response = await axios.get(`/api/user?search=${keyword}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    });
       setUserList(response.data);
     } catch (error) {
       console.error("Error searching users:", error);
@@ -207,7 +222,11 @@ const Discussions = () => {
       groupPic: fileUrl,
     };
     try {
-      const response = await axios.post("https://chatroom-backend-32xg.onrender.com/api/chats/group", data);
+      const response = await axios.post("/api/chats/group", data, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    });
       setOpenDiscussionModal(false); // Close modal after creation
       accessChat(); // Refresh chat list after creating a room
       setFileUrl("")
@@ -223,7 +242,11 @@ const Discussions = () => {
         userIds: addMemberList, // Assuming addMemberList is an array of user IDs
       };
   
-      const response = await axios.put(`https://chatroom-backend-32xg.onrender.com/api/chats/groupadd`, data);
+      const response = await axios.put(`/api/chats/groupadd`, data, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    });
       console.log('Response Data:', response.data); // Log the entire response for debugging
   
       // Assuming the response contains the updated groupChatRoom object
@@ -253,7 +276,11 @@ const Discussions = () => {
         userId:userId,
         chatId:groupChatRoom._id
       }
-        const response=await axios.put(`https://chatroom-backend-32xg.onrender.com/api/chats/groupremove`,data)
+        const response=await axios.put(`/api/chats/groupremove`,data, {
+          headers: {
+              'Authorization': `Bearer ${token}`, // Set the Authorization header
+          },
+      })
         console.log(response)
         setGroupChatRoom((prevGroup) => ({
           ...prevGroup,
@@ -267,7 +294,11 @@ const Discussions = () => {
   // Fetch chat groups
   const accessChat = async () => {
     try {
-      const response = await axios.get("https://chatroom-backend-32xg.onrender.com/api/chats");
+      const response = await axios.get("/api/chats", {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    });
       const filterGroups = response.data.filter(
         (group) => group.isGroupChat === true
       );
@@ -337,11 +368,15 @@ const Discussions = () => {
     try {
       if (editMessage) {
         console.log(newMessage,"faltu1")
-        const response = await axios.put("https://chatroom-backend-32xg.onrender.com/api/message/edit", {
+        const response = await axios.put("/api/message/edit", {
           messageId: editMessage._id,
           content: newMessage,
           userId:userId
-        });
+        }, {
+          headers: {
+              'Authorization': `Bearer ${token}`, // Set the Authorization header
+          },
+      });
         setChatMessage((message) => {
           return message.map((item) =>
             item._id == editMessage._id
@@ -367,13 +402,17 @@ const Discussions = () => {
         console.log(fileUrl)
           // Send message with file URL
           if (groupChatRoom?._id && fileUrl && file?.[0]?.type) {
-            const response = await axios.post("https://chatroom-backend-32xg.onrender.com/api/message", {
+            const response = await axios.post("/api/message", {
                 chatId: groupChatRoom._id,
                 content: null,
                 link: fileUrl,
                 messageType: file[0].type,
                 userId:userId
-            });
+            }, {
+              headers: {
+                  'Authorization': `Bearer ${token}`, // Set the Authorization header
+              },
+          });
             setChatMessage((prevMessages) => [response.data,...prevMessages]);
             socket.current.emit("newMessage", response.data);
             setNewMessage("");
@@ -384,12 +423,16 @@ const Discussions = () => {
       } else if(messageType=="left"){
         console.log(newMessage,"faltu3")
   
-        const response = await axios.post("https://chatroom-backend-32xg.onrender.com/api/message", {
+        const response = await axios.post("/api/message", {
           chatId: groupChatRoom?._id,
           content:  `${JSON.parse(localStorage.getItem('user')).username} has left the group`,
           messageType:"left",
           userId:userId
-        });
+        }, {
+          headers: {
+              'Authorization': `Bearer ${token}`, // Set the Authorization header
+          },
+      });
   
         setChatMessage((prevMessages) => [response.data,...prevMessages]);
         socket.current.emit("newMessage", response.data);
@@ -410,7 +453,7 @@ const Discussions = () => {
         setReplyMessage(null)
       } else {
         console.log("faltu4")
-        const response = await axios.post("https://chatroom-backend-32xg.onrender.com/api/message", {
+        const response = await axios.post("/api/message", {
           chatId: groupChatRoom?._id,
           content: newMessage,
           replyTo: replyTo,
@@ -418,7 +461,11 @@ const Discussions = () => {
           link: null,
           replyMessage: replyMessage,
           userId:userId
-        });
+        }, {
+          headers: {
+              'Authorization': `Bearer ${token}`, // Set the Authorization header
+          },
+      });
         setChatMessage((prevMessages) => [response.data,...prevMessages]);
         socket.current.emit("newMessage", response.data);
         setNewMessage("");
@@ -505,7 +552,11 @@ const Discussions = () => {
   const fetchChats = async () => {
     try {
       const response = await axios.get(
-        `https://chatroom-backend-32xg.onrender.com/api/message/${groupChatRoom?._id}?page=1&limit=10`
+        `/api/message/${groupChatRoom?._id}?page=1&limit=10`, {
+          headers: {
+              'Authorization': `Bearer ${token}`, // Set the Authorization header
+          },
+      }
       );
       setChatMessage(response.data.results);
       setChatCount(response.data.count);
@@ -520,7 +571,11 @@ const Discussions = () => {
     try {
       const response = await axios.get(nextLink, {
         withCredentials: true,
-      });
+      }, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    });
       setChatMessage((prevMessages) => [
         ...prevMessages,
         ...response.data.results,
@@ -614,11 +669,15 @@ const Discussions = () => {
 
   const deleteMessage = async (deleteMsg, deleteForEveryone) => {
     try {
-      const response = await axios.put("https://chatroom-backend-32xg.onrender.com/api/message", {
+      const response = await axios.put("/api/message", {
         messageId: selectedMessage?._id,
         deleteMsg: deleteMsg,
         deleteForEveryone: deleteForEveryone,
-      });
+      }, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    });
       if (deleteMsg) {
         setChatMessage((prevMessages) =>
           prevMessages.map((message) =>
@@ -677,11 +736,15 @@ const Discussions = () => {
   //star messages======================================================
   const handleStarMessage = async (data, isStarred) => {
     try {
-      const response = await axios.put(`https://chatroom-backend-32xg.onrender.com/api/message/star`, {
+      const response = await axios.put(`/api/message/star`, {
         messageId: data?._id,
         userId: user?._id,
         isStarred: isStarred,
-      });
+      }, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    });
       if (response.status == 200 && isStarred == true) {
         setStarredMessages((prev) =>
           prev.filter((data) => data?._id !== response?.data?.message?._id)
@@ -698,7 +761,11 @@ const Discussions = () => {
 
   const getStarMessage = async () => {
     try {
-      const response = await axios.get(`https://chatroom-backend-32xg.onrender.com/api/message/star`);
+      const response = await axios.get(`/api/message/star`, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    });
 
       setStarredMessages(response.data.messages);
     } catch (error) {
@@ -715,7 +782,11 @@ const Discussions = () => {
   const getPinnedMessages = async () => {
     try {
       const response = await axios.get(
-        `https://chatroom-backend-32xg.onrender.com/api/message/pinnedmessages/${groupChatRoom?._id}`
+        `/api/message/pinnedmessages/${groupChatRoom?._id}`, {
+          headers: {
+              'Authorization': `Bearer ${token}`, // Set the Authorization header
+          },
+      }
       );
       setPinnedMessages(response.data);
     } catch (error) {
@@ -731,10 +802,14 @@ const Discussions = () => {
 
   const handlePinMessage = async (data) => {
     try {
-      const response = await axios.put(`https://chatroom-backend-32xg.onrender.com/api/message/pinnedmessages`, {
+      const response = await axios.put(`/api/message/pinnedmessages`, {
         messageId: data?._id,
         pinStatus: data.isPinned,
-      });
+      }, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    });
       console.log(response, "power1");
       if (response.status == 200) {
         setChatMessage((prevMessages) =>
@@ -843,11 +918,15 @@ const Discussions = () => {
 
   const markAsSeen = async (messageId, userId) => {
     try {
-      const response = await axios.put(`https://chatroom-backend-32xg.onrender.com/api/message/seen`, {
+      const response = await axios.put(`/api/message/seen`, {
         messageId: messageId,
         userId: userId,
         chatId: groupChatRoom?._id, // Pass the current chat room ID
-      });
+      }, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    });
   
       // Update the chat messages to reflect the seen status
       setChatMessage((messages) =>
@@ -922,7 +1001,11 @@ const Discussions = () => {
       return;
     }
     try {
-      const response = await axios.delete(`https://chatroom-backend-32xg.onrender.com/api/chats/${groupChatRoom?._id}`);    
+      const response = await axios.delete(`/api/chats/${groupChatRoom?._id}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    });    
       if (response.status === 200) {
         console.log("Group chat deleted successfully.");
         await setGroups((prevGroups) => {
@@ -953,7 +1036,11 @@ const Discussions = () => {
       userId:userId
     }
     try {
-      const response=await axios.put(`https://chatroom-backend-32xg.onrender.com/api/chats/groupremove`,data)
+      const response=await axios.put(`/api/chats/groupremove`,data, {
+        headers: {
+            'Authorization': `Bearer ${token}`, // Set the Authorization header
+        },
+    })
         if(response.status==200){
           console.log("User removed from group successfully")
           setGroups((group)=>{
@@ -1003,7 +1090,11 @@ const Discussions = () => {
     }
     console.log(data,'power')
     try {
-        const response=await axios.put(`https://chatroom-backend-32xg.onrender.com/api/chats/group`,data)
+        const response=await axios.put(`/api/chats/group`,data, {
+          headers: {
+              'Authorization': `Bearer ${token}`, // Set the Authorization header
+          },
+      })
         if(response.status==200){
           console.log("Group updated successfully")
           if(editGroupDescription!=null){
