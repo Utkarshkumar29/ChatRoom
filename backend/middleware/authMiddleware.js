@@ -20,15 +20,15 @@ const protect = asyncHandler(async (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log('Decoded Token:', decoded); // Log decoded token
         req.user = await User.findById(decoded.id).select("-password");
+        console.log('User Found:', req.user); // Log user information
         next();
     } catch (error) {
+        console.error(error); // Log error details
         res.status(401);
         throw new Error("Not authorized, token failed");
     }
 });
 
 module.exports = { protect };
-
-
-module.exports={protect}    
