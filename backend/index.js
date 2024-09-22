@@ -15,20 +15,19 @@ const Chat = require('./Models/chatModal');
 require('dotenv').config();
 
 app.use(express.json());
-app.use(
-    cors({
-      origin: "https://chat-room-fscl.vercel.app/", // Explicitly specify the allowed origin
-      credentials: true, // Important for cookies, authorization headers with HTTPS
-      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-      allowedHeaders: [
-        "Origin",
-        "Content-Type",
-        "Accept",
-        "Authorization",
-        "X-Request-With",
-      ],
-    })
-  );
+cors({
+    origin: "https://chat-room-fscl.vercel.app", // Removed trailing slash
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: [
+      "Origin",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+      "X-Requested-With",
+    ],
+})
+ 
   
 app.use(cookieParser());
 
