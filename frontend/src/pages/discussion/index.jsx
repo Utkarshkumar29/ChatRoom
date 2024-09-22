@@ -141,12 +141,12 @@ const Discussions = () => {
 
   const fetchGroupMedia=async()=>{
     try {
-      const response=await axios.get(`https://chat-room-eight-rouge.vercel.app/api/message/groupMedia/${groupChatRoom._id}`, {
+      const response = await axios.get(`https://chat-room-eight-rouge.vercel.app/api/message/groupMedia/${groupChatRoom._id}`, {
         headers: {
-          'Authorization': `Bearer ${token}`, // Set the Authorization header
+            Authorization: `Bearer ${token}`,
         },
-        withCredentials: true, // Make sure this is at the same level as headers
-      })
+        withCredentials: true,
+    });
       setGroupMedia(response.data)
     } catch (error) {
         console.log(error)

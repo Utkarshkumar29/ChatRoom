@@ -16,7 +16,7 @@ require('dotenv').config();
 
 app.use(express.json());
 app.use(cors({
-    origin: "https://chat-room-fscl.vercel.app", // Your frontend URL
+    origin: ["https://chat-room-fscl.vercel.app", "http://localhost:3000"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Origin", "Content-Type", "Accept", "Authorization", "X-Requested-With"],
@@ -59,7 +59,7 @@ const server = app.listen(PORT, () => {
 const io = new Server(server, {
     pingTimeout: 60000,
     cors: {
-        origin: "http://localhost:3000"
+        origin: "https://chat-room-fscl.vercel.app"
     }
 });
 
