@@ -203,7 +203,7 @@ const Discussions = () => {
   // Search for users
   const handleSearch = async (keyword) => {
     try {
-      const response = await axios.get(`https://chat-room-eight-rouge.vercel.app/api/user?search=${keyword}`, {
+      const response = await axios.get(`https://chatroom-y7ou.onrender.com/api/user?search=${keyword}`, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
         },withCredentials: true,
@@ -218,7 +218,7 @@ const Discussions = () => {
    const checkAndCreateChat = async (user) => {
     setSelectedChat(user);
     try {
-        const response = await axios.post('https://chat-room-eight-rouge.vercel.app/api/chats', { userId: user?._id }, {
+        const response = await axios.post('https://chatroom-y7ou.onrender.com/api/chats', { userId: user?._id }, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
           },withCredentials: true,
@@ -238,7 +238,7 @@ const Discussions = () => {
         userIds: addMemberList, // Assuming addMemberList is an array of user IDs
       };
   
-      const response = await axios.put(`https://chat-room-eight-rouge.vercel.app/api/chats/groupadd`, data, {
+      const response = await axios.put(`https://chatroom-y7ou.onrender.com/api/chats/groupadd`, data, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
         },withCredentials: true,
@@ -272,7 +272,7 @@ const Discussions = () => {
         userId:userId,
         chatId:groupChatRoom._id
       }
-        const response=await axios.put(`https://chat-room-eight-rouge.vercel.app/api/chats/groupremove`,data, {
+        const response=await axios.put(`https://chatroom-y7ou.onrender.com/api/chats/groupremove`,data, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
           },withCredentials: true,
@@ -290,7 +290,7 @@ const Discussions = () => {
   // Fetch chat groups
   const accessChat = async () => {
     try {
-      const response = await axios.get("https://chat-room-eight-rouge.vercel.app/api/chats", {
+      const response = await axios.get("https://chatroom-y7ou.onrender.com/api/chats", {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
         },withCredentials: true,
@@ -365,7 +365,7 @@ const Discussions = () => {
     try {
       if (editMessage) {
         console.log(newMessage,"faltu1")
-        const response = await axios.put("https://chat-room-eight-rouge.vercel.app/api/message/edit", {
+        const response = await axios.put("https://chatroom-y7ou.onrender.com/api/message/edit", {
           messageId: editMessage._id,
           content: newMessage,
           userId:userId
@@ -399,7 +399,7 @@ const Discussions = () => {
         console.log(fileUrl)
           // Send message with file URL
           if (groupChatRoom?._id && fileUrl && file?.[0]?.type) {
-            const response = await axios.post("https://chat-room-eight-rouge.vercel.app/api/message", {
+            const response = await axios.post("https://chatroom-y7ou.onrender.com/api/message", {
                 chatId: groupChatRoom._id,
                 content: null,
                 link: fileUrl,
@@ -420,9 +420,9 @@ const Discussions = () => {
       } else if(messageType=="left"){
         console.log(newMessage,"faltu3")
   
-        const response = await axios.post("https://chat-room-eight-rouge.vercel.app/api/message", {
+        const response = await axios.post("https://chatroom-y7ou.onrender.com/api/message", {
           chatId: groupChatRoom?._id,
-          content:  `${JSON.parse(localStorage.getItem('user')).username} has left the group`,
+          content:  `${JSON.parse(localStorage.getItem('user'))?.username} has left the group`,
           messageType:"left",
           userId:userId
         }, {
@@ -450,7 +450,7 @@ const Discussions = () => {
         setReplyMessage(null)
       } else {
         console.log("faltu4")
-        const response = await axios.post("https://chat-room-eight-rouge.vercel.app/api/message", {
+        const response = await axios.post("https://chatroom-y7ou.onrender.com/api/message", {
           chatId: groupChatRoom?._id,
           content: newMessage,
           replyTo: replyTo,
@@ -549,7 +549,7 @@ const Discussions = () => {
   const fetchChats = async () => {
     try {
       const response = await axios.get(
-        `https://chat-room-eight-rouge.vercel.app/api/message/${groupChatRoom?._id}?page=1&limit=10`, {
+        `https://chatroom-y7ou.onrender.com/api/message/${groupChatRoom?._id}?page=1&limit=10`, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
           },withCredentials: true,
@@ -667,7 +667,7 @@ const Discussions = () => {
 
   const deleteMessage = async (deleteMsg, deleteForEveryone) => {
     try {
-      const response = await axios.put("https://chat-room-eight-rouge.vercel.app/api/message", {
+      const response = await axios.put("https://chatroom-y7ou.onrender.com/api/message", {
         messageId: selectedMessage?._id,
         deleteMsg: deleteMsg,
         deleteForEveryone: deleteForEveryone,
@@ -734,7 +734,7 @@ const Discussions = () => {
   //star messages======================================================
   const handleStarMessage = async (data, isStarred) => {
     try {
-      const response = await axios.put(`https://chat-room-eight-rouge.vercel.app/api/message/star`, {
+      const response = await axios.put(`https://chatroom-y7ou.onrender.com/api/message/star`, {
         messageId: data?._id,
         userId: user?._id,
         isStarred: isStarred,
@@ -759,7 +759,7 @@ const Discussions = () => {
 
   const getStarMessage = async () => {
     try {
-      const response = await axios.get(`https://chat-room-eight-rouge.vercel.app/api/message/star`, {
+      const response = await axios.get(`https://chatroom-y7ou.onrender.com/api/message/star`, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
         },withCredentials: true,
@@ -780,7 +780,7 @@ const Discussions = () => {
   const getPinnedMessages = async () => {
     try {
       const response = await axios.get(
-        `https://chat-room-eight-rouge.vercel.app/api/message/pinnedmessages/${groupChatRoom?._id}`, {
+        `https://chatroom-y7ou.onrender.com/api/message/pinnedmessages/${groupChatRoom?._id}`, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
           },withCredentials: true,
@@ -800,7 +800,7 @@ const Discussions = () => {
 
   const handlePinMessage = async (data) => {
     try {
-      const response = await axios.put(`https://chat-room-eight-rouge.vercel.app/api/message/pinnedmessages`, {
+      const response = await axios.put(`https://chatroom-y7ou.onrender.com/api/message/pinnedmessages`, {
         messageId: data?._id,
         pinStatus: data.isPinned,
       }, {
@@ -916,7 +916,7 @@ const Discussions = () => {
 
   const markAsSeen = async (messageId, userId) => {
     try {
-      const response = await axios.put(`https://chat-room-eight-rouge.vercel.app/api/message/seen`, {
+      const response = await axios.put(`https://chatroom-y7ou.onrender.com/api/message/seen`, {
         messageId: messageId,
         userId: userId,
         chatId: groupChatRoom?._id, // Pass the current chat room ID
@@ -999,7 +999,7 @@ const Discussions = () => {
       return;
     }
     try {
-      const response = await axios.delete(`https://chat-room-eight-rouge.vercel.app/api/chats/${groupChatRoom?._id}`, {
+      const response = await axios.delete(`https://chatroom-y7ou.onrender.com/api/chats/${groupChatRoom?._id}`, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
         },withCredentials: true,
@@ -1028,13 +1028,13 @@ const Discussions = () => {
 
   const groupRemove=async()=>{
     const userId=JSON.parse(localStorage.getItem('user'))._id;
-    const username=JSON.parse(localStorage.getItem('user')).username;
+    const username=JSON.parse(localStorage.getItem('user'))?.username;
     const data={
       chatId:groupChatRoom?._id,
       userId:userId
     }
     try {
-      const response=await axios.put(`https://chat-room-eight-rouge.vercel.app/api/chats/groupremove`,data, {
+      const response=await axios.put(`https://chatroom-y7ou.onrender.com/api/chats/groupremove`,data, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
         },withCredentials: true,
@@ -1088,7 +1088,7 @@ const Discussions = () => {
     }
     console.log(data,'power')
     try {
-        const response=await axios.put(`https://chat-room-eight-rouge.vercel.app/api/chats/group`,data, {
+        const response=await axios.put(`https://chatroom-y7ou.onrender.com/api/chats/group`,data, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
           },withCredentials: true,
@@ -1259,13 +1259,13 @@ useEffect(()=>{
                         }}
                       >
                         <img
-                          src={group.users[1].pic}
+                          src={group?.users[1]?.pic}
                           className=" w-[48px] h-[48px] rounded-full "
                         />
                         <div className=" w-full ">
                           <div className=" flex justify-between w-full items-center ">
                             <p className=" font-medium text-base text-[#16171C] ">
-                              {group?.users[1].username}
+                              {group?.users[1]?.username}
                             </p>
                             <p className=" text-[#949497] text-[12px] leading-[18px] ">
                               {getTimeAgo(group?.latestMessage?.createdAt)}
@@ -1327,7 +1327,7 @@ useEffect(()=>{
                           className="w-[48px] h-[48px] rounded-full"
                         />
                         <div>
-                          <p>{group?.groupChatRoom.users[1].username }</p>
+                          <p>{group?.groupChatRoom.users[1]?.username }</p>
                           <p>
                             {draftMessages[group.groupChatRoom?._id]
                               ? `Draft: ${
@@ -1362,7 +1362,7 @@ useEffect(()=>{
                         <div className=" w-full ">
                           <div className=" flex justify-between w-full items-center ">
                             <p className=" font-medium text-base text-[#16171C] ">
-                              {group?.users[1].username}
+                              {group?.users[1]?.username}
                             </p>
                             <p className=" text-[#949497] text-[12px] leading-[18px] ">
                               {getTimeAgo(group?.latestMessage?.createdAt)}
@@ -1433,12 +1433,12 @@ useEffect(()=>{
           <div className="flex flex-col border border-[#D7D7D8] bg-white rounded-2xl relative w-full h-full ">
             <div className=" font-semibold text-xl py-[16px] px-[24px] relative flex border-b border-[#D7D7D8] max-h-[80px] " onClick={()=>setOpenGroupMenu(!openGroupMenu)} >
               <img
-                src={groupChatRoom.groupPic}
+                src={groupChatRoom?.groupPic}
                 alt="Error"
                 className=" w-[48px] h-[48px] rounded-full "
               />
               <div>
-                <p>{groupChatRoom?.users[1].username}</p>
+                <p>{groupChatRoom?.users[1]?.username}</p>
                 <p>{groupChatRoom?.users.length}</p>
               </div>
             </div>
@@ -1449,7 +1449,7 @@ useEffect(()=>{
                   <div className=" w-full ">
                     <p className=" font-medium ">Pinned Message</p>
                     <div className=" flex " >
-               <p className=" text-[#949497] ">{message?.sender.username}:{"  "} </p>
+               <p className=" text-[#949497] ">{message?.sender?.username}:{"  "} </p>
                   <div className=" flex gap-[24px]  ">
                     {!message.isDeleted || !message.isDeletedForEveryOne ? (
                       <p>{message.content}</p>
@@ -1529,7 +1529,7 @@ useEffect(()=>{
                               <div className="  ">
                                 <p className=" py-[16px] px-[24px] font-semibold text-[18px] leading-[27px] border-b border-[#D7D7D8] ">About {groupChatRoom?.chatName} </p>
                                 <div className=" flex gap-[24px] py-[16px] px-[24px] border-b border-[#D7D7D8] ">
-                                  <img src={groupChatRoom.groupPic} alt="Error" className=" min-w-[96px] h-[96px] rounded-full  " />
+                                  <img src={groupChatRoom?.groupPic} alt="Error" className=" min-w-[96px] h-[96px] rounded-full  " />
                                   <div className=" flex flex-col justify-center w-full ">
                                     {editGroupName!=null ? (
                                       <form className=" flex items-center gap-[24px] w-full" onSubmit={updateGroup}>
@@ -1540,7 +1540,7 @@ useEffect(()=>{
                                         </div>
                                         </form>
                                     ):(<div>
-                                      <p className=" flex w-[164px] justify-between font-medium text-[#16171C] ">{groupChatRoom?.users[1].username} <span onClick={()=>setEditGroupName("")}><PencilIcon/></span> </p>
+                                      <p className=" flex w-[164px] justify-between font-medium text-[#16171C] ">{groupChatRoom?.users[1]?.username} <span onClick={()=>setEditGroupName("")}><PencilIcon/></span> </p>
                                       <p className=" text-[#57585C] ">{groupChatRoom.users.length} Members</p>
                                     </div>)}
                                   </div>                                  
@@ -1687,7 +1687,7 @@ useEffect(()=>{
                                   <div className=" w-full ">
                                     <div className={`   ${message.sender?._id == userId ? "bg-[#EDF3FB] ": "bg-[#F2F3F5]"} w-full p-[8px] rounded-[8px]  `}>
                                       <p className=" font-medium text-base text-[#949494] ">
-                                        {message?.sender.username}
+                                        {message?.sender?.username}
                                       </p>
                                       <p className=" text-balance text-[#323236] ">
                                         {message?.replyMessage?.content}
@@ -1868,7 +1868,7 @@ useEffect(()=>{
               {replyMessage != null && (
                 <div className=" flex justify-between w-full bg-[#D7D7D8] p-[8px] rounded-lg text-[#949497] ">
                   <div className="  ">
-                    <p>{replyMessage?.sender.username}</p>
+                    <p>{replyMessage?.sender?.username}</p>
                     <p className=" text-[#323236] ">{replyMessage.content}</p>
                   </div>
                   <span
@@ -2013,7 +2013,7 @@ useEffect(()=>{
                         {/* Optional placeholder */}
                         {userList.map((user) => (
                           <option key={user?._id} value={user?._id}>
-                            {user.username} - {user?._id}
+                            {user?.username} - {user?._id}
                           </option>
                         ))}
                       </select>
@@ -2103,7 +2103,7 @@ useEffect(()=>{
                                 className=" w-[48px] h-[48px] rounded-full "
                               />
                               <div>
-                                <p>{group?.users[1].username}</p>
+                                <p>{group?.users[1]?.username}</p>
                                 <p>
                                   {draftMessages &&
                                   draftMessages[group?._id] ? (

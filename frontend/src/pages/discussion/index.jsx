@@ -141,7 +141,7 @@ const Discussions = () => {
 
   const fetchGroupMedia=async()=>{
     try {
-      const response = await axios.get(`https://chat-room-eight-rouge.vercel.app/api/message/groupMedia/${groupChatRoom._id}`, {
+      const response = await axios.get(`https://chatroom-y7ou.onrender.com/api/message/groupMedia/${groupChatRoom._id}`, {
         headers: {
             Authorization: `Bearer ${token}`,
         },
@@ -155,7 +155,7 @@ const Discussions = () => {
 
   const fetchGroupDocument=async()=>{
     try {
-      const response=await axios.get(`https://chat-room-eight-rouge.vercel.app/api/message/groupDocument/${groupChatRoom._id}`, {
+      const response=await axios.get(`https://chatroom-y7ou.onrender.com/api/message/groupDocument/${groupChatRoom._id}`, {
         headers: {
           'Authorization': `Bearer ${token}`, // Set the Authorization header
         },
@@ -203,7 +203,7 @@ const Discussions = () => {
   // Search for users
   const handleSearch = async (keyword) => {
     try {
-      const response = await axios.get(`https://chat-room-eight-rouge.vercel.app/api/user?search=${keyword}`, {
+      const response = await axios.get(`https://chatroom-y7ou.onrender.com/api/user?search=${keyword}`, {
         headers: {
           'Authorization': `Bearer ${token}`, // Set the Authorization header
         },
@@ -225,7 +225,7 @@ const Discussions = () => {
       groupPic: fileUrl,
     };
     try {
-      const response = await axios.post("https://chat-room-eight-rouge.vercel.app/api/chats/group", data, {
+      const response = await axios.post("https://chatroom-y7ou.onrender.com/api/chats/group", data, {
         headers: {
           'Authorization': `Bearer ${token}`, // Set the Authorization header
         },
@@ -246,7 +246,7 @@ const Discussions = () => {
         userIds: addMemberList, // Assuming addMemberList is an array of user IDs
       };
   
-      const response = await axios.put(`https://chat-room-eight-rouge.vercel.app/api/chats/groupadd`, data, {
+      const response = await axios.put(`https://chatroom-y7ou.onrender.com/api/chats/groupadd`, data, {
         headers: {
           'Authorization': `Bearer ${token}`, // Set the Authorization header
         },
@@ -281,7 +281,7 @@ const Discussions = () => {
         userId:userId,
         chatId:groupChatRoom._id
       }
-        const response=await axios.put(`https://chat-room-eight-rouge.vercel.app/api/chats/groupremove`,data, {
+        const response=await axios.put(`https://chatroom-y7ou.onrender.com/api/chats/groupremove`,data, {
           headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
           },
@@ -300,7 +300,7 @@ const Discussions = () => {
   // Fetch chat groups
   const accessChat = async () => {
     try {
-      const response = await axios.get("https://chat-room-eight-rouge.vercel.app/api/chats", {
+      const response = await axios.get("https://chatroom-y7ou.onrender.com/api/chats", {
         headers: {
           'Authorization': `Bearer ${token}`, // Set the Authorization header
         },
@@ -375,7 +375,7 @@ const Discussions = () => {
     try {
       if (editMessage) {
         console.log(newMessage,"faltu1")
-        const response = await axios.put("https://chat-room-eight-rouge.vercel.app/api/message/edit", {
+        const response = await axios.put("https://chatroom-y7ou.onrender.com/api/message/edit", {
           messageId: editMessage._id,
           content: newMessage,
           userId:userId
@@ -409,7 +409,7 @@ const Discussions = () => {
         console.log(fileUrl)
           // Send message with file URL
           if (groupChatRoom?._id && fileUrl && file?.[0]?.type) {
-            const response = await axios.post("https://chat-room-eight-rouge.vercel.app/api/message", {
+            const response = await axios.post("https://chatroom-y7ou.onrender.com/api/message", {
                 chatId: groupChatRoom._id,
                 content: null,
                 link: fileUrl,
@@ -430,7 +430,7 @@ const Discussions = () => {
       } else if(messageType=="left"){
         console.log(newMessage,"faltu3")
   
-        const response = await axios.post("https://chat-room-eight-rouge.vercel.app/api/message", {
+        const response = await axios.post("https://chatroom-y7ou.onrender.com/api/message", {
           chatId: groupChatRoom?._id,
           content:  `${JSON.parse(localStorage.getItem('user')).username} has left the group`,
           messageType:"left",
@@ -460,7 +460,7 @@ const Discussions = () => {
         setReplyMessage(null)
       } else {
         console.log("faltu4")
-        const response = await axios.post("https://chat-room-eight-rouge.vercel.app/api/message", {
+        const response = await axios.post("https://chatroom-y7ou.onrender.com/api/message", {
           chatId: groupChatRoom?._id,
           content: newMessage,
           replyTo: replyTo,
@@ -559,7 +559,7 @@ const Discussions = () => {
   const fetchChats = async () => {
     try {
       const response = await axios.get(
-        `https://chat-room-eight-rouge.vercel.app/api/message/${groupChatRoom?._id}?page=1&limit=10`, {
+        `https://chatroom-y7ou.onrender.com/api/message/${groupChatRoom?._id}?page=1&limit=10`, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
           },withCredentials: true,
@@ -676,7 +676,7 @@ const Discussions = () => {
 
   const deleteMessage = async (deleteMsg, deleteForEveryone) => {
     try {
-      const response = await axios.put("https://chat-room-eight-rouge.vercel.app/api/message", {
+      const response = await axios.put("https://chatroom-y7ou.onrender.com/api/message", {
         messageId: selectedMessage?._id,
         deleteMsg: deleteMsg,
         deleteForEveryone: deleteForEveryone,
@@ -743,7 +743,7 @@ const Discussions = () => {
   //star messages======================================================
   const handleStarMessage = async (data, isStarred) => {
     try {
-      const response = await axios.put(`https://chat-room-eight-rouge.vercel.app/api/message/star`, {
+      const response = await axios.put(`https://chatroom-y7ou.onrender.com/api/message/star`, {
         messageId: data?._id,
         userId: user?._id,
         isStarred: isStarred,
@@ -768,7 +768,7 @@ const Discussions = () => {
 
   const getStarMessage = async () => {
     try {
-      const response = await axios.get(`https://chat-room-eight-rouge.vercel.app/api/message/star`, {
+      const response = await axios.get(`https://chatroom-y7ou.onrender.com/api/message/star`, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
         },withCredentials: true,
@@ -789,7 +789,7 @@ const Discussions = () => {
   const getPinnedMessages = async () => {
     try {
       const response = await axios.get(
-        `https://chat-room-eight-rouge.vercel.app/api/message/pinnedmessages/${groupChatRoom?._id}`, {
+        `https://chatroom-y7ou.onrender.com/api/message/pinnedmessages/${groupChatRoom?._id}`, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
           },withCredentials: true,
@@ -809,7 +809,7 @@ const Discussions = () => {
 
   const handlePinMessage = async (data) => {
     try {
-      const response = await axios.put(`https://chat-room-eight-rouge.vercel.app/api/message/pinnedmessages`, {
+      const response = await axios.put(`https://chatroom-y7ou.onrender.com/api/message/pinnedmessages`, {
         messageId: data?._id,
         pinStatus: data.isPinned,
       }, {
@@ -925,7 +925,7 @@ const Discussions = () => {
 
   const markAsSeen = async (messageId, userId) => {
     try {
-      const response = await axios.put(`https://chat-room-eight-rouge.vercel.app/api/message/seen`, {
+      const response = await axios.put(`https://chatroom-y7ou.onrender.com/api/message/seen`, {
         messageId: messageId,
         userId: userId,
         chatId: groupChatRoom?._id, // Pass the current chat room ID
@@ -1008,7 +1008,7 @@ const Discussions = () => {
       return;
     }
     try {
-      const response = await axios.delete(`https://chat-room-eight-rouge.vercel.app/api/chats/${groupChatRoom?._id}`, {
+      const response = await axios.delete(`https://chatroom-y7ou.onrender.com/api/chats/${groupChatRoom?._id}`, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
         },withCredentials: true,
@@ -1043,7 +1043,7 @@ const Discussions = () => {
       userId:userId
     }
     try {
-      const response=await axios.put(`https://chat-room-eight-rouge.vercel.app/api/chats/groupremove`,data, {
+      const response=await axios.put(`https://chatroom-y7ou.onrender.com/api/chats/groupremove`,data, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
         },withCredentials: true,
@@ -1097,7 +1097,7 @@ const Discussions = () => {
     }
     console.log(data,'power')
     try {
-        const response=await axios.put(`https://chat-room-eight-rouge.vercel.app/api/chats/group`,data,{
+        const response=await axios.put(`https://chatroom-y7ou.onrender.com/api/chats/group`,data,{
           headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
           },
