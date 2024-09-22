@@ -28,7 +28,7 @@ const SignUp = () => {
                 email,
                 password
             } 
-            const response=await axios.post('/api/user',data)
+            const response=await axios.post('/api/user',data,{ withCredentials: true,})
             if(response.status==200){
                 toast("Sign Up successfully")
                 setIsSignedIn(true)
@@ -66,7 +66,7 @@ const SignUp = () => {
     
         console.log('Token:', data); // Log the token for debugging
         // Send data to backend for auth or signup
-        const response = await axios.post('/api/user/google-auth', data);
+        const response = await axios.post('/api/user/google-auth', data,{ withCredentials: true,});
     
         if (response.status === 200 || response.status === 201) {
           console.log("Response from backend:", response.data);

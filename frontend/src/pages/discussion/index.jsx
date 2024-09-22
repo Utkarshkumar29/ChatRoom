@@ -144,7 +144,7 @@ const Discussions = () => {
       const response=await axios.get(`api/message/groupMedia/${groupChatRoom._id}`, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     })
       setGroupMedia(response.data)
     } catch (error) {
@@ -157,7 +157,7 @@ const Discussions = () => {
       const response=await axios.get(`api/message/groupDocument/${groupChatRoom._id}`, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     })
       setGroupDocument(response.data)
       console.log(response.data,'trying')
@@ -204,7 +204,7 @@ const Discussions = () => {
       const response = await axios.get(`/api/user?search=${keyword}`, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     });
       setUserList(response.data);
     } catch (error) {
@@ -225,7 +225,7 @@ const Discussions = () => {
       const response = await axios.post("/api/chats/group", data, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     });
       setOpenDiscussionModal(false); // Close modal after creation
       accessChat(); // Refresh chat list after creating a room
@@ -245,7 +245,7 @@ const Discussions = () => {
       const response = await axios.put(`/api/chats/groupadd`, data, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     });
       console.log('Response Data:', response.data); // Log the entire response for debugging
   
@@ -279,7 +279,7 @@ const Discussions = () => {
         const response=await axios.put(`/api/chats/groupremove`,data, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
-          },
+          },withCredentials: true,
       })
         console.log(response)
         setGroupChatRoom((prevGroup) => ({
@@ -297,7 +297,7 @@ const Discussions = () => {
       const response = await axios.get("/api/chats", {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     });
       const filterGroups = response.data.filter(
         (group) => group.isGroupChat === true
@@ -375,7 +375,7 @@ const Discussions = () => {
         }, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
-          },
+          },withCredentials: true,
       });
         setChatMessage((message) => {
           return message.map((item) =>
@@ -411,7 +411,7 @@ const Discussions = () => {
             }, {
               headers: {
                   'Authorization': `Bearer ${token}`, // Set the Authorization header
-              },
+              },withCredentials: true,
           });
             setChatMessage((prevMessages) => [response.data,...prevMessages]);
             socket.current.emit("newMessage", response.data);
@@ -431,7 +431,7 @@ const Discussions = () => {
         }, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
-          },
+          },withCredentials: true,
       });
   
         setChatMessage((prevMessages) => [response.data,...prevMessages]);
@@ -464,7 +464,7 @@ const Discussions = () => {
         }, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
-          },
+          },withCredentials: true,
       });
         setChatMessage((prevMessages) => [response.data,...prevMessages]);
         socket.current.emit("newMessage", response.data);
@@ -555,7 +555,7 @@ const Discussions = () => {
         `/api/message/${groupChatRoom?._id}?page=1&limit=10`, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
-          },
+          },withCredentials: true,
       }
       );
       setChatMessage(response.data.results);
@@ -574,7 +574,7 @@ const Discussions = () => {
       }, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     });
       setChatMessage((prevMessages) => [
         ...prevMessages,
@@ -676,7 +676,7 @@ const Discussions = () => {
       }, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     });
       if (deleteMsg) {
         setChatMessage((prevMessages) =>
@@ -743,7 +743,7 @@ const Discussions = () => {
       }, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     });
       if (response.status == 200 && isStarred == true) {
         setStarredMessages((prev) =>
@@ -764,7 +764,7 @@ const Discussions = () => {
       const response = await axios.get(`/api/message/star`, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     });
 
       setStarredMessages(response.data.messages);
@@ -785,7 +785,7 @@ const Discussions = () => {
         `/api/message/pinnedmessages/${groupChatRoom?._id}`, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
-          },
+          },withCredentials: true,
       }
       );
       setPinnedMessages(response.data);
@@ -808,7 +808,7 @@ const Discussions = () => {
       }, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     });
       console.log(response, "power1");
       if (response.status == 200) {
@@ -925,7 +925,7 @@ const Discussions = () => {
       }, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     });
   
       // Update the chat messages to reflect the seen status
@@ -1004,7 +1004,7 @@ const Discussions = () => {
       const response = await axios.delete(`/api/chats/${groupChatRoom?._id}`, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     });    
       if (response.status === 200) {
         console.log("Group chat deleted successfully.");
@@ -1039,7 +1039,7 @@ const Discussions = () => {
       const response=await axios.put(`/api/chats/groupremove`,data, {
         headers: {
             'Authorization': `Bearer ${token}`, // Set the Authorization header
-        },
+        },withCredentials: true,
     })
         if(response.status==200){
           console.log("User removed from group successfully")
@@ -1093,7 +1093,7 @@ const Discussions = () => {
         const response=await axios.put(`/api/chats/group`,data, {
           headers: {
               'Authorization': `Bearer ${token}`, // Set the Authorization header
-          },
+          },withCredentials: true,
       })
         if(response.status==200){
           console.log("Group updated successfully")
