@@ -59,6 +59,7 @@ import DoctIcon from "../../assets/icons/DoctIcon";
 import ClassicSpinner from "../../components/loader/ClassicSpinner";
 import TickIcon from "../../assets/icons/TickIcon";
 import NullImage from "../../assets/Null.svg"
+import UnstarIcon from "../../assets/icons/UnstarIcon";
 
 
 const Discussions = () => {
@@ -1125,21 +1126,22 @@ useEffect(()=>{
 
   return (
     <>
-      <div className="w-full flex h-screen bg-[#F2F3F5] py-[60px] px-[80px] gap-[32px]  ">
+      <div className="w-full flex h-screen bg-[#F2F3F5] py-[40px] px-[80px] gap-[32px]  ">
         <div className="h-full flex flex-col items-center gap-[24px] flex-1 w-full min-w-[500px] ">
           <div className=" max-w-[7 00px] bg-[#FFFFFF] w-full flex items-center justify-evenly py-[16px] px-[24px] rounded-2xl border border-[#D7D7D8] gap-[24px] ">
+          <Link
+              to="/discussions"
+              className=" w-full text-[#1660CD] bg-[#FFFFFF] py-[12px] px-[32px] rounded-xl border border-[#1600CD] text-center "
+            >
+              Discussions
+            </Link>
             <Link
               to="/chatRoom"
               className="w-full bg-[#1660CD] text-[#FFFFFF] py-[12px] px-[32px] rounded-xl text-center "
             >
               Messages
             </Link>
-            <Link
-              to="/discussions"
-              className=" w-full text-[#1660CD] bg-[#FFFFFF] py-[12px] px-[32px] rounded-xl border border-[#1600CD] text-center "
-            >
-              Discussions
-            </Link>
+            
           </div>
           <div className=" relative bg-[#FFFFFF] w-full h-full rounded-3xl border border-[#D7D7D8] ">
             <div className="flex relative  items-center justify-between font-semibold text-lg border-b border-[#D7D7D8] py-[16px] px-[24px] ">
@@ -1410,21 +1412,120 @@ useEffect(()=>{
           </div>
         </div>
         {openStarChat ? (
-          <div className="flex flex-col flex-1 bg-green-900 p-[32px]">
-            <p>Starred Chats</p>
+          <div className="flex flex-col border border-[#D7D7D8] h-full w-full bg-[#FFFFFF] rounded-2xl">
+            <p className=" py-[16px] px-[24px] font-semibold text-[18px] leading-[32px] border-b border-[#D7D7D8] ">Starred Chats</p>
             <div>
               {starredMessages.map((message, index) => {
+                const currentDate = new Date(message.createdAt).toLocaleDateString();
                 return (
-                  <div className=" bg-yellow-600">
-                    <p>{message.content}</p>
-                    <span
-                      onClick={() => {
-                        handleStarMessage(message, true);
-                      }}
+                  <>
+                    <div className="flex justify-center items-center">
+                      <p className="bg-[#57585C] text-white text-[12px] leading-[18px] py-[6px] px-[16px] rounded-lg">
+                        {currentDate === new Date().toLocaleDateString() ? "Today" : currentDate}
+                      </p>
+                    </div>
+                    <div
+                      key={index}
+                      ref={(el) => (messageRef.current[index] = el)}
+                      data-id={message?._id}
+                      className={`${
+                        message.sender?._id === userId && "flex-row-reverse"
+                      } mb-2 px-[24px] flex gap-[8px]`}
+                      onMouseEnter={() => setOpenMenuIndex(index)}
+                      onMouseLeave={() => setOpenMenuIndex(null)}
                     >
-                      Remove
-                    </span>
-                  </div>
+                      {allowSelect && (
+                        <input
+                          type="checkbox"
+                          onClick={() =>
+                            setSelectMessage((prev) => {
+                              return [...prev, message];
+                            })
+                          }
+                        />
+                      )}
+                      <div className="flex">
+                        <img
+                          src={
+                            message.sender?.pic ||
+                            JSON.parse(localStorage.getItem("user")).pic
+                          }
+                          alt=""
+                          className="w-[32px] h-[32px] rounded-full"
+                        />
+                      </div>
+              
+                      <div
+                        className={`${
+                          message.sender?._id === userId
+                            ? "bg-[#DAE6F7]  rounded-tr-[2px]"
+                            : "bg-[#D7D7D8] rounded-tl-[2px]"
+                        } relative p-[8px] pb-[6px] rounded-xl max-w-xl`}
+                      >
+                        {!message.isDeleted || !message.isDeletedForEveryOne ? (
+                          message?.replyTo && message?.replyMessage ? (
+                            <div className="w-full">
+                              <div className={`${message.sender?._id === userId ? "bg-[#EDF3FB]" : "bg-[#F2F3F5]"} w-full p-[8px] rounded-[8px]`}>
+                                <p className="font-medium text-base text-[#949494]">
+                                  {message?.sender.username}
+                                </p>
+                                <p className="text-balance text-[#323236]">
+                                  {message?.replyMessage?.content}
+                                </p>
+                              </div>
+                              <p className="pr-[54px] pt-[4px] px-[8px] pb-[6px]">
+                                {message?.content}
+                              </p>
+                            </div>
+                          ) : (
+                            message?.content && (
+                              <p className="last:mb-4 pr-[54px] pt-[4px] px-[8px] pb-[6px]">
+                                {message?.content}
+                              </p>
+                            )
+                          )
+                        ) : (
+                          <p>Message is deleted</p>
+                        )}
+              
+                        {/* Handle PDF, Image, and other file attachments */}
+                        {message.messageType === "application/pdf" && message.link && (
+                          <div className={`flex flex-col gap-[4px]`}>
+                            <div className={`w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${message.sender?._id === userId ? "bg-[#EDF3FB]" : "bg-[#F2F3F5]"}`}>
+                              <a href={message.link}><DownloadIcon /></a>
+                            </div>
+                            <p className="flex gap-[6px] items-center">
+                              <PDFIcon /> {extractFileName(message.link)}
+                            </p>
+                          </div>
+                        )}
+              
+                        {/* Additional media/file handling */}
+              
+                        {/* Display message timestamp and read icon */}
+                        <p className="absolute bottom-0 right-1 flex pl-[8px] gap-[4px] items-center">
+                          <span className="text-[10px] leading-[15px] whitespace-nowrap">
+                            {formatTime(message.createdAt)}
+                          </span>
+              
+                          {/* Add a null check for groupChatRoom and users */}
+                          {groupChatRoom?.users && (
+                            <ReadIcon
+                              iconColor={
+                                message?.isReadByAll.length === groupChatRoom.users.length
+                                  ? "#1600D0"
+                                  : "#57585C"
+                              }
+                            />
+                          )}
+                        </p>
+                      </div>
+                      <div onClick={() => {
+                                                    handleStarMessage(message, true);
+                                                  }} className=" flex justify-center items-center cursor-pointer"><UnstarIcon/></div>
+                      
+                    </div>
+                  </>
                 );
               })}
             </div>
