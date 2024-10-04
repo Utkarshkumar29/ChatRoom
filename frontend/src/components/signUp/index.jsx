@@ -6,6 +6,7 @@ import { signInWithGoogle } from "../../firebase/auth";
 import { Navigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 import { GoogleAuthProvider } from 'firebase/auth';
+import GoogleIcon from "../../assets/icons/GoogleIcon";
 
 const SignUp = () => {
     const [username,setUsername]=useState("")
@@ -17,11 +18,11 @@ const SignUp = () => {
 
     const handleSubmit=async(e)=>{
         e.preventDefault();
-        if (password !== confirmPassword) {
+        {/*if (password !== confirmPassword) {
             console.log('eerr')
             toast.error("Passwords do not match");
             return;
-        }
+        }*/}
         try {
             const data={
                 username,
@@ -89,53 +90,66 @@ const SignUp = () => {
   }
 
   return (
-    <><form className=" flex justify-center items-center text-red-400 w-full h-full flex-col" onSubmit={handleSubmit}>
-    <p>Sign Up</p>
-    <div className=" flex items-center">
+    <><div className=" flex justify-center items-center w-full h-full flex-col gap-[24px] pt-[40px] pr-[48px] pb-[24px] pl-[48px] ">
+    <p className=" text-[28px] font-semibold text-[#16171C] ">Sign Up</p>
+    <button
+        onClick={handleGoogleAuth}
+        className="w-full justify-center p-[10px] border border-[#1D213040] rounded-2xl flex gap-[10px] items-center text-[14px] leading-[21px] text-[#16171C] font-medium "
+      >
+        <GoogleIcon />
+        Sign in with Google
+      </button>
+            <h1
+                  className=" text-[#A3A3A5]  w-full text-center overflow-hidden before:h-[1px] after:h-[1px] after:bg-[#1D213040]
+              after:inline-block after:relative after:align-middle after:w-[35%] 
+              before:bg-[#1D213040] before:inline-block before:relative before:align-middle 
+              before:w-[35%] md:before:w-[32%] md:after:w-[32%] lg:before:w-[32%] xl:before:w-[41%] lg:after:w-[32%] xl:after:w-[41%] before:right-2 after:left-2 text-sm "
+                >
+                  <span className=" px-[10px] ">Or</span>
+              </h1>
+    <div className=" flex flex-col gap-[8px] w-full">
       <p>Username</p>
       <input
         type="text"
         placeholder="Enter your email"
-        className="border-2 border-red"
+        className=" bg-[#F2F3F5] border border-[#D7D7D8] py-[12px] px-[24px] rounded-xl "
         value={username}
         onChange={(e)=>{setUsername(e.target.value)}}
       />
     </div>
-    <div className=" flex items-center">
+    <div className=" flex flex-col gap-[8px] w-full ">
       <p>Email</p>
       <input
         type="text"
         placeholder="Enter your email"
-        className="border-2 border-red"
+        className=" bg-[#F2F3F5] border border-[#D7D7D8] py-[12px] px-[24px] rounded-xl "
         value={email}
         onChange={(e)=>{setEmail(e.target.value)}}
       />
     </div>
-    <div className=" flex items-center">
+    <div className=" flex flex-col gap-[8px] w-full ">
       <p>Password</p>
       <input
         type="password"
         placeholder="Enter your email"
-        className="border-2 border-red"
+        className=" bg-[#F2F3F5] border border-[#D7D7D8] py-[12px] px-[24px] rounded-xl "
         value={password}
         onChange={(e)=>{setPassword(e.target.value)}}
       />
     </div>
-    <div className=" flex items-center">
-      <p>confirm Password</p>
+    {/*<div className="flex flex-col gap-[8px] w-full ">
+      <p>Confirm Password</p>
       <input
         type="password"
         placeholder="Enter your email"
-        className="border-2 border-red"
+        className=" bg-[#F2F3F5] border border-[#D7D7D8] py-[12px] px-[24px] rounded-xl "
         value={confirmPassword}
         onChange={(e)=>{setConfirmPassword(e.target.value)}}
       />
-    </div>
-    <button>SignUp</button>
-  </form>
-  <button onClick={handleGoogleAuth}>
-                Sign in with Google
-            </button></>
+    </div>*/}
+    <button onClick={handleSubmit} className=" bg-[#1660CD] text-white font-medium w-full p-[12px] rounded-2xl ">SignUp</button>
+  </div>
+  </>
   );
 };
 
