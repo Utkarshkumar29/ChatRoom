@@ -8,5 +8,4 @@ router.route('/').post(registerUser).get(protect,searchUser)
 router.route('/google-auth').post(GoogleAuth)
 router.route('/login').post(authUser)
 
-
 module.exports = router;

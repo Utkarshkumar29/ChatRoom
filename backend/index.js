@@ -59,7 +59,9 @@ const server = app.listen(PORT, () => {
 const io = new Server(server, {
     pingTimeout: 60000,
     cors: {
-        origin: "https://chat-room-fscl.vercel.app"
+        origin: ["https://chat-room-fscl.vercel.app", "http://localhost:3000"],
+        methods: ["GET", "POST"],
+        credentials: true
     }
 });
 
