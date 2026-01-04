@@ -35,7 +35,7 @@ import SearchIcon from "../../assets/icons/SearchIcon";
 import DraftMessagesIcon from "../../assets/icons/DraftMessagesIcon";
 import ArchiveIcon from "../../assets/icons/ArchiveIcon";
 import UnreadMessageIcon from "../../assets/icons/UnreadMessageIcon";
-import AllChats from "../../assets/icons/AllChats";
+
 import { formatDistanceToNow } from "date-fns";
 import SendIcon from "../../assets/icons/SendIcon";
 import CopyIcon from "../../assets/icons/CopyIcon";
@@ -60,6 +60,7 @@ import ClassicSpinner from "../../components/loader/ClassicSpinner";
 import TickIcon from "../../assets/icons/TickIcon";
 import NullImage from "../../assets/Null.svg"
 import UnstarIcon from "../../assets/icons/UnstarIcon";
+import AllChatsIcon from "../../assets/icons/AllChatsIcon";
 
 
 const Discussions = () => {
@@ -1169,7 +1170,7 @@ const Discussions = () => {
                             setOpenUnReadGroups(false)
                           }}
                         >
-                          <AllChats />
+                          <AllChatsIcon />
                           All Chats
                         </div>
                       </MenuItem>
@@ -1975,7 +1976,7 @@ const Discussions = () => {
                                       setReplyMessage(message);
                                     }}
                                   >
-                                    <AllChats /> Reply
+                                    <AllChatsIcon /> Reply
                                   </p>
                                 </MenuItem>
                                 <MenuItem>

@@ -1,4 +1,4 @@
-const AllChats = () => {
+const AllChatsIcon = () => {
   return (
     <svg
       width="24"
@@ -17,4 +17,4 @@ const AllChats = () => {
   );
 };
 
-export default AllChats;
+export default AllChatsIcon;

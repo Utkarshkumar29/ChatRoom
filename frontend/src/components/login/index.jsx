@@ -16,10 +16,12 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoading,setIsLoading]=useState(false)
   const { user, setUser, token, setToken } = useContext(UserContext);
 
   const handleLogin = async () => {
     const data = { email, password };
+    setIsLoading(true)
     try {
       const response = await axios.post(
         "https://chatroom-y7ou.onrender.com/api/user/login",
@@ -36,6 +38,8 @@ const Login = () => {
     } catch (error) {
       console.log(error);
       // Handle error state or display error message
+    }finally{
+      setIsLoading(false)
     }
   };
 
@@ -137,7 +141,7 @@ const Login = () => {
         onClick={handleLogin}
         className=" bg-[#1660CD] text-white font-medium w-full p-[12px] rounded-2xl "
       >
-        Login
+        {!isLoading ? "Login":"Circle"}
       </button>
     </div>
   );
