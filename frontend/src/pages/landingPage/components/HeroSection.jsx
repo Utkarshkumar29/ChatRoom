@@ -42,7 +42,7 @@ hover:bg-[#FF6B47]/90 hover:shadow-2xl hover:shadow-[#FF6B47] transition-all dur
           <div className=" shadow-xl w-[670px] h-[400px] rounded-2xl px-[24px] py-[16px] ">
             <div className=" bg-blue-100 w-full h-full rounded-xl ">
                 <div className=" w-full h-full p-[12px] flex gap-4 ">
-                    <div className=" max-w-[40px] max-h-[40px] w-full h-full rounded-md bg-[#2D3748] text-white flex items-center justify-center text-2xl ">#</div>
+                    <div className=" max-w-[40px] max-h-[40px] w-full h-full rounded-md  text-white flex items-center justify-center text-2xl ">#</div>
                     <div className=" flex flex-col h-min ">
                         <span className=" text-[16px] font-semibold ">Product Launch 2026</span>
                         <span className=" text-[12px] ">24 members active</span>
