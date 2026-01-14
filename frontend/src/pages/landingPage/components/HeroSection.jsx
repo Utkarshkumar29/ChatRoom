@@ -41,7 +41,7 @@ hover:bg-[#FF6B47]/90 hover:shadow-2xl hover:shadow-[#FF6B47] transition-all dur
             </div>
           </div>
 
-          <div className=" flex gap-6 flex-col shadow-xl w-[670px]  rounded-2xl px-[24px] py-[16px] ">
+          <div className=" flex gap-6 flex-col shadow-xl w-[670px] rounded-2xl px-[24px] py-[16px] transition-transform duration-1000 ease-in-out hover:scale-110 ">
             <div className=" bg-blue-100 w-full rounded-xl p-[12px] flex flex-col gap-6 ">
               <div className=" w-full flex gap-4 items-center ">
                 <div className=" bg-[#2D3748] w-[50px] h-[50px] rounded-md  text-white flex items-center justify-center text-2xl ">
@@ -54,40 +54,38 @@ hover:bg-[#FF6B47]/90 hover:shadow-2xl hover:shadow-[#FF6B47] transition-all dur
                   <span className=" text-[12px] ">24 members active</span>
                 </div>
               </div>
-              <div className=" flex-col flex gap-6 ">
-                <div className=" p-[8px] rounded-lg bg-white flex gap-2 items-center ">
-                  <img src={user} className=" w-[40px] h-[40px] rounded-full " />
+              <div className=" flex-col flex gap-4 ">
+                <div className="transition-transform duration-300 ease-out hover:translate-x-2 p-[8px] rounded-lg bg-white flex gap-2 items-center ">
+                  <img src={user} className=" w-[40px] h-[40px] rounded-full object-cover " />
                   <div className=" flex flex-col ">
-                    <span>Sarah Chen</span>
-                    <span>
+                    <span className="text-xs md:text-sm font-medium text-[#2D3748] ">Sarah Chen</span>
+                    <span className=" text-xs text-[#718096] line-clamp-2">
                       Design mockups are ready for review. Check the files
                       section.
                     </span>
                   </div>
                 </div>
-                <div className=" p-[8px] rounded-lg bg-white flex gap-2 items-center ">
-                  <img src={user} className=" w-[40px] h-[40px] rounded-full " />
+                <div className=" transition-transform duration-300 ease-out hover:translate-x-2 p-[8px] rounded-lg bg-white flex gap-2 items-center ">
+                  <img src={user} className=" w-[40px] h-[40px] rounded-full object-cover " />
                   <div className=" flex flex-col ">
-                    <span>Sarah Chen</span>
-                    <span>
-                      Design mockups are ready for review. Check the files
-                      section.
+                    <span className="text-xs md:text-sm font-medium text-[#2D3748] ">Michael Rodriguez</span>
+                    <span className=" text-xs text-[#718096] line-clamp-2">
+                     Great work! I've added my feedback in the comments.
                     </span>
                   </div>
                 </div>
-                <div className=" p-[8px] rounded-lg bg-white flex gap-2 items-center ">
-                  <img src={user} className=" w-[40px] h-[40px] rounded-full " />
+                <div className="transition-transform duration-300 ease-out hover:translate-x-2 p-[8px] rounded-lg bg-white flex gap-2 items-center ">
+                  <img src={user} className=" w-[40px] h-[40px] rounded-full object-cover " />
                   <div className=" flex flex-col ">
-                    <span>Sarah Chen</span>
-                    <span>
-                      Design mockups are ready for review. Check the files
-                      section.
+                    <span className="text-xs md:text-sm font-medium text-[#2D3748] ">Sarah Chen</span>
+                    <span className=" text-xs text-[#718096] line-clamp-2">
+                      Marketing materials approved. Moving to production phase.
                     </span>
                   </div>
                 </div>
               </div>
             </div>
-            <div className=" flex items-center gap-4 ">
+            <div className=" flex items-center gap-3 ">
               <div className="flex items-center h-full">
                 <img
                   src={user}
@@ -101,12 +99,12 @@ hover:bg-[#FF6B47]/90 hover:shadow-2xl hover:shadow-[#FF6B47] transition-all dur
                   src={user}
                   className="w-[40px] h-[40px] rounded-full border border-white -ml-3"
                 />
-                <div className="-ml-3 w-[40px] h-[40px] rounded-full bg-gray-700 text-white flex items-center justify-center text-sm border border-white">
+                <div className="-ml-3 w-[40px] h-[40px] rounded-full bg-gray-200 text-white flex items-center justify-center text-sm border border-white">
                   21+
                 </div>
               </div>
 
-              <span className=" font-semibold text-gray-500 ">24 members in this room</span>
+              <span className=" text-sm font-semibold text-[#718096] ">24 members in this room</span>
             </div>
           </div>
         </div>
