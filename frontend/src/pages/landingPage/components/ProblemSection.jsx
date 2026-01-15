@@ -3,22 +3,22 @@ import React from 'react'
 const ProblemSection = () => {
   const chaosProblems = [
     {
-      icon: "MessageSquare",
+      icon: <i class="fa-regular fa-message text-[#E53E3E] text-[20px] "></i>,
       title: "Scattered Messages",
       description: "Important discussions lost across Slack, Teams, email, and text messages"
     },
     {
-      icon: "Bell",
+      icon: <i class="fa-regular fa-bell text-[#E53E3E] text-[20px]"></i>,
       title: "Notification Overload",
       description: "Constant interruptions from multiple platforms killing productivity"
     },
     {
-      icon: "Search",
+      icon: <i class="fa-solid fa-magnifying-glass text-[#E53E3E] text-[20px]"></i>,
       title: "Lost Information",
       description: "Spending hours searching for decisions made weeks ago"
     },
     {
-      icon: "Users",
+      icon: <i class="fa-solid fa-users text-[#E53E3E] text-[20px]"></i>,
       title: "Context Switching",
       description: "Jumping between 5+ tools just to follow one conversation"
     }
@@ -26,22 +26,22 @@ const ProblemSection = () => {
 
   const organizedSolutions = [
     {
-      icon: "FolderOpen",
+      icon: <i class="fa-regular fa-folder-open text-[#38A169]  text-[20px]"></i>,
       title: "Dedicated Rooms",
       description: "Every project gets its own organized space with clear structure"
     },
     {
-      icon: "Shield",
+      icon: <i class="fa-solid fa-shield-halved text-[#38A169]  text-[20px]"></i>,
       title: "Role-Based Access",
       description: "Control who sees what with granular permission management"
     },
     {
-      icon: "Archive",
+      icon: <i class="fa-solid fa-box-archive text-[#38A169]  text-[20px]"></i>,
       title: "Searchable History",
       description: "Find any message, file, or decision in seconds with powerful search"
     },
     {
-      icon: "Zap",
+      icon: <i class="fa-solid fa-bolt text-[#38A169]  text-[20px]"></i>,
       title: "Single Platform",
       description: "Everything your team needs in one professional workspace"
     }
@@ -59,21 +59,21 @@ const ProblemSection = () => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12">
-          <div className="bg-destructive/5 rounded-2xl p-6 md:p-8 lg:p-10 border-2 border-destructive/20">
+        <div className="grid lg:grid-cols-2 gap-6 md:gap-8 lg:gap-12 ">
+          <div className="bg-[#E53E3E]/5 rounded-2xl p-6 md:p-8 lg:p-10 border-2 border-destructive/20">
             <div className="flex items-center gap-3 mb-6 md:mb-8">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-destructive/20 rounded-full flex items-center justify-center">
-                <i class="fa-solid fa-triangle-exclamation text-[#E53E3E] "></i>
+                <i class="fa-solid fa-triangle-exclamation text-[#E53E3E]  text-[24px] "></i>
               </div>
               <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">The Problem</h3>
             </div>
 
             <div className="space-y-4 md:space-y-6">
               {chaosProblems?.map((problem, index) => (
-                <div key={index} className="bg-card rounded-xl p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div key={index} className="bg-[#FFFFFF] rounded-xl p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-3 md:gap-4">
                     <div className="w-10 h-10 md:w-12 md:h-12 bg-destructive/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <i class="fa-regular fa-bell"></i>
+                      {problem?.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-base md:text-lg font-semibold text-foreground mb-2">{problem?.title}</h4>
@@ -86,25 +86,25 @@ const ProblemSection = () => {
 
             <div className="mt-6 md:mt-8 p-4 md:p-6 bg-destructive/10 rounded-xl">
               <p className="text-sm md:text-base text-foreground font-medium text-center">
-                <span className="text-destructive font-bold">60% of teams</span> report losing critical information in scattered communication tools
+                <span className="text-[#E53E3E] font-bold">60% of teams</span> report losing critical information in scattered communication tools
               </p>
             </div>
           </div>
 
-          <div className="bg-success/5 rounded-2xl p-6 md:p-8 lg:p-10 border-2 border-success/20">
+          <div className="bg-[#38A169]/5 rounded-2xl p-6 md:p-8 lg:p-10 border-2 border-success/20">
             <div className="flex items-center gap-3 mb-6 md:mb-8">
               <div className="w-10 h-10 md:w-12 md:h-12 bg-success/20 rounded-full flex items-center justify-center">
-                
+                <i class="fa-regular fa-circle-check text-[#38A169] text-[30px] "></i>
               </div>
               <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">The Solution</h3>
             </div>
 
             <div className="space-y-4 md:space-y-6">
               {organizedSolutions?.map((solution, index) => (
-                <div key={index} className="bg-card rounded-xl p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div key={index} className="bg-[#FFFFFF] rounded-xl p-4 md:p-6 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-start gap-3 md:gap-4">
                     <div className="w-10 h-10 md:w-12 md:h-12 bg-success/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                      
+                      {solution?.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="text-base md:text-lg font-semibold text-foreground mb-2">{solution?.title}</h4>
@@ -117,7 +117,7 @@ const ProblemSection = () => {
 
             <div className="mt-6 md:mt-8 p-4 md:p-6 bg-success/10 rounded-xl">
               <p className="text-sm md:text-base text-foreground font-medium text-center">
-                <span className="text-success font-bold">40% faster decisions</span> with organized, searchable conversations
+                <span className="text-[#38A169] font-bold">40% faster decisions</span> with organized, searchable conversations
               </p>
             </div>
           </div>

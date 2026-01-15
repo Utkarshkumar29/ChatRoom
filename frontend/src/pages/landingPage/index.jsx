@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import Login from "../../components/login";
-import SignUp from "../../components/signUp";
 import StickyNavigationBar from "./components/StickyNavigationBar";
 import HeroSection from "./components/HeroSection";
+import SolutionPreview from "./components/SolutionPreview";
 import ProblemSection from "./components/ProblemSection";
+import React, { useState } from "react";;
 
 const LandingPage = () => {
   const [section, setSection] = useState("login");
@@ -14,6 +13,7 @@ const LandingPage = () => {
       <main>
         <HeroSection/>
         <ProblemSection/>
+        <SolutionPreview/>
       </main>
     </div>
   );

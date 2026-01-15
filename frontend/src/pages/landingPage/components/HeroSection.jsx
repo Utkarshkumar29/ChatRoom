@@ -42,7 +42,7 @@ hover:bg-[#FF6B47]/90 hover:shadow-2xl hover:shadow-[#FF6B47] transition-all dur
           </div>
 
           <div className=" flex gap-6 flex-col shadow-xl w-[670px] rounded-2xl px-[24px] py-[16px] transition-transform duration-1000 ease-in-out hover:scale-110 ">
-            <div className=" bg-blue-100 w-full rounded-xl p-[12px] flex flex-col gap-6 ">
+            <div className=" bg-[#F7FAFC] w-full rounded-xl p-[12px] flex flex-col gap-6 ">
               <div className=" w-full flex gap-4 items-center ">
                 <div className=" bg-[#2D3748] w-[50px] h-[50px] rounded-md  text-white flex items-center justify-center text-2xl ">
                   #
@@ -55,7 +55,7 @@ hover:bg-[#FF6B47]/90 hover:shadow-2xl hover:shadow-[#FF6B47] transition-all dur
                 </div>
               </div>
               <div className=" flex-col flex gap-4 ">
-                <div className="transition-transform duration-300 ease-out hover:translate-x-2 p-[8px] rounded-lg bg-white flex gap-2 items-center ">
+                <div className="shadow-xl transition-transform duration-300 ease-out hover:translate-x-2 p-[8px] rounded-lg bg-white flex gap-2 items-center ">
                   <img src={user} className=" w-[40px] h-[40px] rounded-full object-cover " />
                   <div className=" flex flex-col ">
                     <span className="text-xs md:text-sm font-medium text-[#2D3748] ">Sarah Chen</span>
@@ -65,7 +65,7 @@ hover:bg-[#FF6B47]/90 hover:shadow-2xl hover:shadow-[#FF6B47] transition-all dur
                     </span>
                   </div>
                 </div>
-                <div className=" transition-transform duration-300 ease-out hover:translate-x-2 p-[8px] rounded-lg bg-white flex gap-2 items-center ">
+                <div className=" shadow-xl transition-transform duration-300 ease-out hover:translate-x-2 p-[8px] rounded-lg bg-white flex gap-2 items-center ">
                   <img src={user} className=" w-[40px] h-[40px] rounded-full object-cover " />
                   <div className=" flex flex-col ">
                     <span className="text-xs md:text-sm font-medium text-[#2D3748] ">Michael Rodriguez</span>
@@ -74,7 +74,7 @@ hover:bg-[#FF6B47]/90 hover:shadow-2xl hover:shadow-[#FF6B47] transition-all dur
                     </span>
                   </div>
                 </div>
-                <div className="transition-transform duration-300 ease-out hover:translate-x-2 p-[8px] rounded-lg bg-white flex gap-2 items-center ">
+                <div className="shadow-xl transition-transform duration-300 ease-out hover:translate-x-2 p-[8px] rounded-lg bg-white flex gap-2 items-center ">
                   <img src={user} className=" w-[40px] h-[40px] rounded-full object-cover " />
                   <div className=" flex flex-col ">
                     <span className="text-xs md:text-sm font-medium text-[#2D3748] ">Sarah Chen</span>
