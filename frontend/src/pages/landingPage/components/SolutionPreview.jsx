@@ -76,7 +76,7 @@ const SolutionPreview = () => {
   };
 
   return (
-    <section id="solution" className="py-12 md:py-16 lg:py-24 bg-muted">
+    <section id="solution" className="py-12 md:py-16 lg:py-24 bg-[#f7fafc] ">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12 lg:mb-16">
           <h2 className="text-2xl md:text-3xl lg:text-5xl font-bold text-foreground mb-4 md:mb-6">
@@ -121,10 +121,10 @@ const SolutionPreview = () => {
             )}
           </div>
 
-          <div className="bg-card rounded-2xl shadow-2xl p-4 md:p-6 lg:p-8 min-h-[400px] md:min-h-[500px]">
+          <div className="bg-white rounded-2xl shadow-2xl p-4 md:p-6 lg:p-8 min-h-[400px] md:min-h-[500px]">
             {activeFeature === 'rooms' &&
-            <div className="space-y-4 md:space-y-6">
-                <div className="flex items-center justify-between">
+            <div className="space-y-4 md:space-y-6 ">
+                <div className="flex items-center justify-between  ">
                   <div>
                     <h3 className="text-lg md:text-xl font-semibold text-foreground">
                       {features?.rooms?.preview?.title}
@@ -140,7 +140,7 @@ const SolutionPreview = () => {
 
                 <div className="space-y-3 md:space-y-4">
                   {features?.rooms?.preview?.messages?.map((msg, index) =>
-                <div key={index} className="bg-[#e8f5fd] rounded-lg p-3 md:p-4 hover:bg-[#e8f5fd]/80 transition-colors">
+                <div key={index} className="bg-[#f7fafc] rounded-lg p-3 md:p-4 hover:bg-[#f7fafc]/80 transition-colors">
                       <div className="flex items-start gap-3">
                         <img src={user} className=" w-[40px] h-[40px] rounded-full object-cover " />
                         <div className="flex-1 min-w-0">
@@ -158,13 +158,13 @@ const SolutionPreview = () => {
             }
 
             {activeFeature === 'members' &&
-            <div className="space-y-4 md:space-y-6">
+            <div className="space-y-4 md:space-y-6 ">
                 <h3 className="text-lg md:text-xl font-semibold text-foreground">
                   {features?.members?.preview?.title}
                 </h3>
                 <div className="space-y-3 md:space-y-4">
                   {features?.members?.preview?.roles?.map((role, index) =>
-                <div key={index} className="bg-[#e8f5fd] rounded-lg p-4 md:p-6">
+                <div key={index} className="bg-[#f7fafc] rounded-lg p-4 md:p-6">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 md:w-12 md:h-12 bg-${role?.color} rounded-lg flex items-center justify-center`} style={{backgroundColor:role?.color}}>
@@ -190,7 +190,7 @@ const SolutionPreview = () => {
                 </h3>
                 <div className="space-y-3 md:space-y-4">
                   {features?.files?.preview?.files?.map((file, index) =>
-                <div key={index} className="bg-[#e8f5fd] rounded-lg p-4 md:p-6 hover:bg-[#e8f5fd]/80 transition-colors cursor-pointer">
+                <div key={index} className="bg-[#f7fafc] rounded-lg p-4 md:p-6 hover:bg-[#f7fafc]/80 transition-colors cursor-pointer">
                       <div className="flex items-center gap-3 md:gap-4">
                         <div className="w-10 h-10 md:w-12 md:h-12 bg-[#E53E3E] rounded-lg flex items-center justify-center flex-shrink-0">
                             <i class="fa-regular fa-file-lines text-white"></i>
@@ -214,12 +214,12 @@ const SolutionPreview = () => {
                   <input
                   type="text"
                   placeholder="Search messages, files, and more..."
-                  className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-[#e8f5fd] rounded-lg text-sm md:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+                  className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-[#f7fafc] rounded-lg text-sm md:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
 
                 </div>
                 <div className="space-y-3 md:space-y-4">
                   {features?.search?.preview?.results?.map((result, index) =>
-                <div key={index} className="bg-[#e8f5fd] rounded-lg p-4 md:p-6 hover:bg-[#e8f5fd]/80 transition-colors cursor-pointer">
+                <div key={index} className="bg-[#f7fafc] rounded-lg p-4 md:p-6 hover:bg-[#f7fafc]/80 transition-colors cursor-pointer">
                       <p className="text-sm md:text-base text-foreground mb-2">{result?.text}</p>
                       <div className="flex items-center gap-4 text-xs md:text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
