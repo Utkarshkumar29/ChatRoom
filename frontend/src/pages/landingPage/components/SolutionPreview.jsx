@@ -79,10 +79,10 @@ const SolutionPreview = () => {
     <section id="solution" className="py-12 md:py-16 lg:py-24 bg-[#f7fafc] ">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12 lg:mb-16">
-          <h2 className="text-2xl md:text-3xl lg:text-5xl font-bold text-foreground mb-4 md:mb-6">
+          <h2 className="text-2xl md:text-3xl lg:text-5xl font-bold text-[#2D3748] mb-4 md:mb-6">
             Experience Organized Communication
           </h2>
-          <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-base md:text-lg lg:text-xl text-[#718096] max-w-3xl mx-auto">
             Explore how ChatFlow Pro transforms chaotic conversations into structured, productive discussions
           </p>
         </div>
@@ -108,10 +108,10 @@ const SolutionPreview = () => {
                   {feature.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-base md:text-lg lg:text-xl font-semibold text-foreground mb-2">
+                    <h3 className="text-base md:text-lg lg:text-xl font-semibold text-[#2D3748] mb-2">
                       {feature?.title}
                     </h3>
-                    <p className="text-sm md:text-base text-muted-foreground">
+                    <p className="text-sm md:text-base text-[#718096]">
                       {feature?.description}
                     </p>
                   </div>
@@ -126,10 +126,10 @@ const SolutionPreview = () => {
             <div className="space-y-4 md:space-y-6 ">
                 <div className="flex items-center justify-between  ">
                   <div>
-                    <h3 className="text-lg md:text-xl font-semibold text-foreground">
+                    <h3 className="text-lg md:text-xl font-semibold text-[#2D3748]">
                       {features?.rooms?.preview?.title}
                     </h3>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-[#718096]">
                       {features?.rooms?.preview?.members} members
                     </p>
                   </div>
@@ -145,10 +145,10 @@ const SolutionPreview = () => {
                         <img src={user} className=" w-[40px] h-[40px] rounded-full object-cover " />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="text-sm md:text-base font-medium text-foreground">{msg?.user}</p>
-                            <span className="text-xs text-muted-foreground">{msg?.time}</span>
+                            <p className="text-sm md:text-base font-medium text-[#2D3748]">{msg?.user}</p>
+                            <span className="text-xs text-[#718096]">{msg?.time}</span>
                           </div>
-                          <p className="text-sm md:text-base text-muted-foreground">{msg?.message}</p>
+                          <p className="text-sm md:text-base text-[#718096]">{msg?.message}</p>
                         </div>
                       </div>
                     </div>
@@ -159,7 +159,7 @@ const SolutionPreview = () => {
 
             {activeFeature === 'members' &&
             <div className="space-y-4 md:space-y-6 ">
-                <h3 className="text-lg md:text-xl font-semibold text-foreground">
+                <h3 className="text-lg md:text-xl font-semibold text-[#2D3748]">
                   {features?.members?.preview?.title}
                 </h3>
                 <div className="space-y-3 md:space-y-4">
@@ -171,8 +171,8 @@ const SolutionPreview = () => {
                             <i class="fa-solid fa-shield-halved text-white  "></i>
                           </div>
                           <div>
-                            <p className="text-base md:text-lg font-semibold text-foreground">{role?.name}</p>
-                            <p className="text-sm text-muted-foreground">{role?.count} members</p>
+                            <p className="text-base md:text-lg font-semibold text-[#2D3748]">{role?.name}</p>
+                            <p className="text-sm text-[#718096]">{role?.count} members</p>
                           </div>
                         </div>
                         
@@ -185,7 +185,7 @@ const SolutionPreview = () => {
 
             {activeFeature === 'files' &&
             <div className="space-y-4 md:space-y-6">
-                <h3 className="text-lg md:text-xl font-semibold text-foreground">
+                <h3 className="text-lg md:text-xl font-semibold text-[#2D3748]">
                   {features?.files?.preview?.title}
                 </h3>
                 <div className="space-y-3 md:space-y-4">
@@ -196,8 +196,8 @@ const SolutionPreview = () => {
                             <i class="fa-regular fa-file-lines text-white"></i>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm md:text-base font-medium text-foreground truncate">{file?.name}</p>
-                          <p className="text-xs md:text-sm text-muted-foreground">{file?.size}</p>
+                          <p className="text-sm md:text-base font-medium text-[#2D3748] truncate">{file?.name}</p>
+                          <p className="text-xs md:text-sm text-[#718096]">{file?.size}</p>
                         </div>
                         
                       </div>
@@ -210,18 +210,18 @@ const SolutionPreview = () => {
             {activeFeature === 'search' &&
             <div className="space-y-4 md:space-y-6">
                 <div className="relative">
-                  <i class="fa-regular fa-calendar absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-muted-foreground"></i>
+                  <i class="fa-regular fa-calendar absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-[#718096]"></i>
                   <input
                   type="text"
                   placeholder="Search messages, files, and more..."
-                  className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-[#f7fafc] rounded-lg text-sm md:text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary" />
+                  className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-[#f7fafc] rounded-lg text-sm md:text-base text-[#2D3748] placeholder:text-[#718096] focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]" />
 
                 </div>
                 <div className="space-y-3 md:space-y-4">
                   {features?.search?.preview?.results?.map((result, index) =>
                 <div key={index} className="bg-[#f7fafc] rounded-lg p-4 md:p-6 hover:bg-[#f7fafc]/80 transition-colors cursor-pointer">
-                      <p className="text-sm md:text-base text-foreground mb-2">{result?.text}</p>
-                      <div className="flex items-center gap-4 text-xs md:text-sm text-muted-foreground">
+                      <p className="text-sm md:text-base text-[#2D3748] mb-2">{result?.text}</p>
+                      <div className="flex items-center gap-4 text-xs md:text-sm text-[#718096]">
                         <span className="flex items-center gap-1">
                           <i class="fa-solid fa-hashtag"></i>
                           {result?.room}

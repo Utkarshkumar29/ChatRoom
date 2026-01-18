@@ -51,10 +51,10 @@ const ProblemSection = () => {
     <section id="problem" className="py-12 md:py-16 lg:py-24 bg-background">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         <div className="text-center mb-8 md:mb-12 lg:mb-16">
-          <h2 className="text-2xl md:text-3xl lg:text-5xl font-bold text-foreground mb-4 md:mb-6">
+          <h2 className="text-2xl md:text-3xl lg:text-5xl font-bold text-[#2D3748] mb-4 md:mb-6">
             Stop Drowning in Communication Chaos
           </h2>
-          <p className="text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-base md:text-lg lg:text-xl text-[#718096] max-w-3xl mx-auto">
             Your team deserves better than scattered messages and lost conversations
           </p>
         </div>
@@ -65,7 +65,7 @@ const ProblemSection = () => {
               <div className="w-10 h-10 md:w-12 md:h-12 bg-destructive/20 rounded-full flex items-center justify-center">
                 <i class="fa-solid fa-triangle-exclamation text-[#E53E3E]  text-[24px] "></i>
               </div>
-              <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">The Problem</h3>
+              <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#2D3748]">The Problem</h3>
             </div>
 
             <div className="space-y-4 md:space-y-6">
@@ -76,8 +76,8 @@ const ProblemSection = () => {
                       {problem?.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-base md:text-lg font-semibold text-foreground mb-2">{problem?.title}</h4>
-                      <p className="text-sm md:text-base text-muted-foreground">{problem?.description}</p>
+                      <h4 className="text-base md:text-lg font-semibold text-[#2D3748] mb-2">{problem?.title}</h4>
+                      <p className="text-sm md:text-base text-[#718096]">{problem?.description}</p>
                     </div>
                   </div>
                 </div>
@@ -85,7 +85,7 @@ const ProblemSection = () => {
             </div>
 
             <div className="mt-6 md:mt-8 p-4 md:p-6 bg-destructive/10 rounded-xl">
-              <p className="text-sm md:text-base text-foreground font-medium text-center">
+              <p className="text-sm md:text-base text-[#2D3748] font-medium text-center">
                 <span className="text-[#E53E3E] font-bold">60% of teams</span> report losing critical information in scattered communication tools
               </p>
             </div>
@@ -96,7 +96,7 @@ const ProblemSection = () => {
               <div className="w-10 h-10 md:w-12 md:h-12 bg-success/20 rounded-full flex items-center justify-center">
                 <i class="fa-regular fa-circle-check text-[#38A169] text-[30px] "></i>
               </div>
-              <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-foreground">The Solution</h3>
+              <h3 className="text-xl md:text-2xl lg:text-3xl font-bold text-[#2D3748]">The Solution</h3>
             </div>
 
             <div className="space-y-4 md:space-y-6">
@@ -107,8 +107,8 @@ const ProblemSection = () => {
                       {solution?.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-base md:text-lg font-semibold text-foreground mb-2">{solution?.title}</h4>
-                      <p className="text-sm md:text-base text-muted-foreground">{solution?.description}</p>
+                      <h4 className="text-base md:text-lg font-semibold text-[#2D3748] mb-2">{solution?.title}</h4>
+                      <p className="text-sm md:text-base text-[#718096]">{solution?.description}</p>
                     </div>
                   </div>
                 </div>
@@ -116,7 +116,7 @@ const ProblemSection = () => {
             </div>
 
             <div className="mt-6 md:mt-8 p-4 md:p-6 bg-success/10 rounded-xl">
-              <p className="text-sm md:text-base text-foreground font-medium text-center">
+              <p className="text-sm md:text-base text-[#2D3748] font-medium text-center">
                 <span className="text-[#38A169] font-bold">40% faster decisions</span> with organized, searchable conversations
               </p>
             </div>

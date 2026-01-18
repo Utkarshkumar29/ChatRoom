@@ -103,20 +103,20 @@ const BenefitGrid = () => {
 
                 <div className="mt-8 md:mt-12 lg:mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 lg:gap-8 w-full px-[24px] ">
                     <div className="text-center p-4 md:p-6 bg-white rounded-xl shadow-xl ">
-                        <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-primary mb-2">40%</p>
-                        <p className="text-sm md:text-base text-muted-foreground">Faster Decisions</p>
+                        <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1E3A5F] mb-2">40%</p>
+                        <p className="text-sm md:text-base text-[#718096]">Faster Decisions</p>
                     </div>
                     <div className="text-center p-4 md:p-6 bg-white rounded-xl shadow-xl ">
-                        <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-primary mb-2">60%</p>
-                        <p className="text-sm md:text-base text-muted-foreground">Fewer Lost Messages</p>
+                        <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1E3A5F] mb-2">60%</p>
+                        <p className="text-sm md:text-base text-[#718096]">Fewer Lost Messages</p>
                     </div>
                     <div className="text-center p-4 md:p-6 bg-white rounded-xl shadow-xl ">
-                        <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-primary mb-2">85%</p>
-                        <p className="text-sm md:text-base text-muted-foreground">User Satisfaction</p>
+                        <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1E3A5F] mb-2">85%</p>
+                        <p className="text-sm md:text-base text-[#718096]">User Satisfaction</p>
                     </div>
                     <div className="text-center p-4 md:p-6 bg-white rounded-xl shadow-xl ">
-                        <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-primary mb-2">12K+</p>
-                        <p className="text-sm md:text-base text-muted-foreground">Active Teams</p>
+                        <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1E3A5F] mb-2">12K+</p>
+                        <p className="text-sm md:text-base text-[#718096]">Active Teams</p>
                     </div>
                 </div>
             </div>
