@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Icon from '../AppIcon';
-import Button from './Button';
+
 
 const StickyNavigationBar = () => {
   const navigate = useNavigate();
@@ -113,6 +112,7 @@ const StickyNavigationBar = () => {
               aria-label="Toggle menu"
             >
               <Icon name={isMenuOpen ? 'X' : 'Menu'} size={24} />
+              {isMenuOpen ? 'X' : 'Menu'}
             </button>
           </div>
         </div>
