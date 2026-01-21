@@ -70,7 +70,7 @@ const BenefitGrid = () => {
                                         <span className=" text-xl font-bold text-[#2D3748] ">{benefit?.title}</span>
                                         <span className=" text-[12px] text-[#E53E3E] font-medium  ">{benefit?.stat}</span>
                                     </div>
-                                    <span className={` ${openBenefitIndex==index && " rotate-180"} `}><i class="fa-solid fa-angle-down"></i></span>
+                                    <span className={` ${openBenefitIndex == index && " rotate-180"} `}><i class="fa-solid fa-angle-down"></i></span>
                                 </div>
                                 <p className=" text-[16px] text-[#718096] ">{benefit?.shortDesc}</p>
 

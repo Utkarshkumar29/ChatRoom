@@ -61,7 +61,7 @@ const ContactSection = () => {
 
   const handleSubmit = (e) => {
     e?.preventDefault();
-    
+
     const errors = validateForm();
     if (Object.keys(errors)?.length > 0) {
       setFormErrors(errors);
@@ -204,8 +204,8 @@ const ContactSection = () => {
                 <p className="text-sm md:text-base text-muted-foreground mb-6">
                   We've received your request. Check your email for trial access details and next steps.
                 </p>
-                <button 
-                  variant="outline" 
+                <button
+                  variant="outline"
                   onClick={() => setSubmitSuccess(false)}
                 >
                   Submit Another Request
@@ -280,15 +280,15 @@ const ContactSection = () => {
                 </div>
 
                 <div className=' flex items-center gap-2 '>
-                    <input
-                  type='checkbox'
-                  label="I agree to the Terms of Service and Privacy Policy"
-                  checked={formData?.agreeToTerms}
-                  onChange={(e) => handleInputChange('agreeToTerms', e?.target?.checked)}
-                  error={formErrors?.agreeToTerms}
-                  required
-                />
-                <span>I agree to the Terms of Service and Privacy Policy</span>
+                  <input
+                    type='checkbox'
+                    label="I agree to the Terms of Service and Privacy Policy"
+                    checked={formData?.agreeToTerms}
+                    onChange={(e) => handleInputChange('agreeToTerms', e?.target?.checked)}
+                    error={formErrors?.agreeToTerms}
+                    required
+                  />
+                  <span>I agree to the Terms of Service and Privacy Policy</span>
                 </div>
 
                 <button
@@ -300,7 +300,7 @@ const ContactSection = () => {
                   iconName="Rocket"
                   iconPosition="left"
                 >
-                    <i class="fa-solid fa-rocket"></i>
+                  <i class="fa-solid fa-rocket"></i>
                   {isSubmitting ? 'Processing...' : 'Start Free Trial'}
                 </button>
 
