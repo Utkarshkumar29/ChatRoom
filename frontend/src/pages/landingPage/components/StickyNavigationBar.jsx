@@ -88,22 +88,22 @@ const StickyNavigationBar = () => {
             </nav>
 
             <div className="hidden lg:block">
-              <Button
+              <buttin
                 variant="outline"
                 size="sm"
                 onClick={() => navigate('/login')}
                 className="hidden sm:flex border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold shadow-sm hover:shadow-md transition-all duration-200"
               >
                 Login
-              </Button>
-              <Button
+              </buttin>
+              <button
                 variant="default"
                 size="sm"
                 onClick={() => navigate('/chat')}
                 className="hidden sm:flex bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-primary-foreground font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
               >
                 Try Chat
-              </Button>
+              </button>
             </div>
 
             <button
@@ -111,7 +111,7 @@ const StickyNavigationBar = () => {
               onClick={toggleMenu}
               aria-label="Toggle menu"
             >
-              <Icon name={isMenuOpen ? 'X' : 'Menu'} size={24} />
+              {isMenuOpen ? <i class="fa-solid fa-x"></i> : <i class="fa-solid fa-bars"></i>}
               {isMenuOpen ? 'X' : 'Menu'}
             </button>
           </div>
@@ -130,7 +130,7 @@ const StickyNavigationBar = () => {
               onClick={toggleMenu}
               aria-label="Close menu"
             >
-              <Icon name="X" size={24} />
+              <i class="fa-solid fa-bars"></i>
             </button>
           </div>
 
@@ -153,7 +153,7 @@ const StickyNavigationBar = () => {
           </nav>
 
           <div className="mt-8">
-            <Button 
+            <button 
               variant="default" 
               className="cta-button w-full"
               onClick={() => {
@@ -162,7 +162,7 @@ const StickyNavigationBar = () => {
               }}
             >
               Login
-            </Button>
+            </button>
           </div>
         </div>
       </div>
