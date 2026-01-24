@@ -62,6 +62,7 @@ const StickyNavigationBar = () => {
 
   return (
     <>
+    
       <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
       <header className="nav-header fixed top-0 left-0 right-0 z-[1000]">
         <div className="max-w-[1200px] mx-auto px-6">
