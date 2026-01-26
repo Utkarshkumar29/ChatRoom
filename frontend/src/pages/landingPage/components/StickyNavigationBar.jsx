@@ -64,8 +64,8 @@ const StickyNavigationBar = () => {
     <>
     
       <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
-      <header className="nav-header fixed top-0 left-0 right-0 z-[1000]">
-        <div className="max-w-[1200px] mx-auto px-6">
+      <header className=" shadow-xl h-[60px] fixed top-0 left-0 right-0 z-[1000] flex items-center justify-between w-full bg-background/80 backdrop-blur-md border-b border-border">
+        <div className="max-w-[1600px] w-full mx-auto px-6">
           <div className="flex items-center justify-between">
             <div className="nav-logo cursor-pointer" onClick={() => handleNavClick('#hero')}>
               ChatFlow Pro
@@ -88,23 +88,23 @@ const StickyNavigationBar = () => {
               ))}
             </nav>
 
-            <div className="hidden lg:block">
+            <div className="hidden lg:flex items-center gap-4">
               <buttin
                 variant="outline"
                 size="sm"
                 onClick={() => navigate('/login')}
-                className="hidden sm:flex border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground font-semibold shadow-sm hover:shadow-md transition-all duration-200"
+                className=" cursor-pointer hidden sm:flex border-2 border-[#1E3A5F] text-[#1E3A5F] hover:bg-[#1E3A5F] hover:text-[#FFFFFF] font-semibold shadow-sm hover:shadow-md transition-all duration-200 px-[24px] py-[8px] rounded-md "
               >
                 Login
               </buttin>
-              <button
+              {/*<button
                 variant="default"
                 size="sm"
                 onClick={() => navigate('/chat')}
-                className="hidden sm:flex bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-600/90 text-primary-foreground font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                className=" cursor-pointer hidden sm:flex text-[#FFFFFF] bg-gradient-to-r from-[#1E3A5F] to-blue-600 hover:from-[#1E3A5F]/90 hover:to-blue-600/90 text-primary-foreground font-semibold shadow-lg hover:shadow-xl transition-all duration-200 px-[16px] py-[8px] rounded-md "
               >
                 Try Chat
-              </button>
+              </button>*/}
             </div>
 
             <button
@@ -122,7 +122,7 @@ const StickyNavigationBar = () => {
         className={`mobile-menu-overlay ${isMenuOpen ? 'open' : ''}`}
         onClick={toggleMenu}
       />
-      <div className={`mobile-menu ${isMenuOpen ? 'open' : ''}`}>
+      <div className={`block lg:hidden ${isMenuOpen ? 'open' : ''}`}>
         <div className="p-6">
           <div className="flex items-center justify-between mb-8">
             <div className="nav-logo">ChatFlow Pro</div>

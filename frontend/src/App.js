@@ -4,6 +4,7 @@ import LandingPage from './pages/landingPage';
 import ChatRoom from './pages/chatPage';
 import Discussions from './pages/discussion';
 import LoginPage from './pages/loginPage';
+import SignUp from './pages/signUp';
 
 function  App() {
   return (
@@ -11,6 +12,7 @@ function  App() {
       <Routes>
         <Route path='/' element={<LandingPage/>} />
         <Route path='/login' element={<LoginPage/>} />
+        <Route path='/signUp' element={<SignUp/>} />
         <Route path='/chatRoom' element={<ChatRoom/>} />
         <Route path='/discussions' element={<Discussions/>} />
       </Routes>
