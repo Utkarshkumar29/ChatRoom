@@ -467,9 +467,8 @@ const Discussions = () => {
           "https://chatroom-y7ou.onrender.com/api/message",
           {
             chatId: groupChatRoom?._id,
-            content: `${
-              JSON.parse(localStorage.getItem("user"))?.username
-            } has left the group`,
+            content: `${JSON.parse(localStorage.getItem("user"))?.username
+              } has left the group`,
             messageType: "left",
             userId: userId,
           },
@@ -797,7 +796,7 @@ const Discussions = () => {
     socket.current.on("messageDeleted", handleMessageDeletedForAll);
   }, [groupChatRoom]);
 
-  useEffect(() => {}, [chatMessage]);
+  useEffect(() => { }, [chatMessage]);
 
   //star messages======================================================
   const handleStarMessage = async (data, isStarred) => {
@@ -1295,9 +1294,8 @@ const Discussions = () => {
                       key={index}
                       ref={(el) => (messageRef.current[index] = el)}
                       data-id={message?._id}
-                      className={`${
-                        message.sender?._id === userId && "flex-row-reverse"
-                      } mb-2 px-[24px] flex gap-[8px]`}
+                      className={`${message.sender?._id === userId && "flex-row-reverse"
+                        } mb-2 px-[24px] flex gap-[8px]`}
                       onMouseEnter={() => setOpenMenuIndex(index)}
                       onMouseLeave={() => setOpenMenuIndex(null)}
                     >
@@ -1323,21 +1321,19 @@ const Discussions = () => {
                       </div>
 
                       <div
-                        className={`${
-                          message.sender?._id === userId
+                        className={`${message.sender?._id === userId
                             ? "bg-[#DAE6F7]  rounded-tr-[2px]"
                             : "bg-[#D7D7D8] rounded-tl-[2px]"
-                        } relative p-[8px] pb-[6px] rounded-xl max-w-xl`}
+                          } relative p-[8px] pb-[6px] rounded-xl max-w-xl`}
                       >
                         {!message.isDeleted || !message.isDeletedForEveryOne ? (
                           message?.replyTo && message?.replyMessage ? (
                             <div className="w-full">
                               <div
-                                className={`${
-                                  message.sender?._id === userId
+                                className={`${message.sender?._id === userId
                                     ? "bg-[#EDF3FB]"
                                     : "bg-[#F2F3F5]"
-                                } w-full p-[8px] rounded-[8px]`}
+                                  } w-full p-[8px] rounded-[8px]`}
                               >
                                 <p className="font-medium text-base text-[#949494]">
                                   {message?.sender.username}
@@ -1366,11 +1362,10 @@ const Discussions = () => {
                           message.link && (
                             <div className={`flex flex-col gap-[4px]`}>
                               <div
-                                className={`w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${
-                                  message.sender?._id === userId
+                                className={`w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${message.sender?._id === userId
                                     ? "bg-[#EDF3FB]"
                                     : "bg-[#F2F3F5]"
-                                }`}
+                                  }`}
                               >
                                 <a href={message.link}>
                                   <DownloadIcon />
@@ -1395,7 +1390,7 @@ const Discussions = () => {
                             <ReadIcon
                               iconColor={
                                 message?.isReadByAll.length ===
-                                groupChatRoom.users.length
+                                  groupChatRoom.users.length
                                   ? "#1600D0"
                                   : "#57585C"
                               }
@@ -1518,36 +1513,32 @@ const Discussions = () => {
                 <div className="w-full max-w-[300px] cursor-pointer h-min bg-white flex-col flex rounded-2xl p-[8px]">
                   <p
                     onClick={() => handleSelectedMenu("about")}
-                    className={` ${
-                      selectedMenu == "about" && " bg-[#E8EFFA] "
-                    } rounded-xl flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px]  `}
+                    className={` ${selectedMenu == "about" && " bg-[#E8EFFA] "
+                      } rounded-xl flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px]  `}
                   >
                     <InfoSquare />
                     About
                   </p>
                   <p
                     onClick={() => handleSelectedMenu("media")}
-                    className={` ${
-                      selectedMenu == "media" && " bg-[#E8EFFA] "
-                    } rounded-xl  flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}
+                    className={` ${selectedMenu == "media" && " bg-[#E8EFFA] "
+                      } rounded-xl  flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}
                   >
                     <MediaIcon />
                     Media
                   </p>
                   <p
                     onClick={() => handleSelectedMenu("document")}
-                    className={` ${
-                      selectedMenu == "document" && " bg-[#E8EFFA] "
-                    } rounded-xl  flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}
+                    className={` ${selectedMenu == "document" && " bg-[#E8EFFA] "
+                      } rounded-xl  flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}
                   >
                     <DocumentIcon />
                     Documents
                   </p>
                   <p
                     onClick={() => handleSelectedMenu("members")}
-                    className={` ${
-                      selectedMenu == "members" && " bg-[#E8EFFA] "
-                    } rounded-xl flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}
+                    className={` ${selectedMenu == "members" && " bg-[#E8EFFA] "
+                      } rounded-xl flex pt-[12px] pr-[24px] pb-[12px] pl-[16px] gap-[16px] `}
                   >
                     <MemberIcon />
                     Members
@@ -1723,9 +1714,8 @@ const Discussions = () => {
                         key={index}
                         ref={(el) => (messageRef.current[index] = el)}
                         data-id={message?._id}
-                        className={` ${
-                          message.sender?._id == userId && " flex-row-reverse "
-                        }   mb-2 px-[24px] flex gap-[8px]  `}
+                        className={` ${message.sender?._id == userId && " flex-row-reverse "
+                          }   mb-2 px-[24px] flex gap-[8px]  `}
                         onMouseEnter={() => setOpenMenuIndex(index)}
                         onMouseLeave={() => setOpenMenuIndex(null)}
                       >
@@ -1751,22 +1741,20 @@ const Discussions = () => {
                         </div>
 
                         <div
-                          className={` ${
-                            message.sender?._id == userId
+                          className={` ${message.sender?._id == userId
                               ? "bg-[#DAE6F7]  rounded-tr-[2px]  "
                               : "bg-[#D7D7D8] rounded-tl-[2px]"
-                          } relative p-[8px] pb-[6px] rounded-xl max-w-xl `}
+                            } relative p-[8px] pb-[6px] rounded-xl max-w-xl `}
                         >
                           {!message.isDeleted ||
-                          !message.isDeletedForEveryOne ? (
+                            !message.isDeletedForEveryOne ? (
                             message?.replyTo && message?.replyMessage ? (
                               <div className=" w-full ">
                                 <div
-                                  className={`   ${
-                                    message.sender?._id == userId
+                                  className={`   ${message.sender?._id == userId
                                       ? "bg-[#EDF3FB] "
                                       : "bg-[#F2F3F5]"
-                                  } w-full p-[8px] rounded-[8px]  `}
+                                    } w-full p-[8px] rounded-[8px]  `}
                                 >
                                   <p className=" font-medium text-base text-[#949494] ">
                                     {message?.sender?.username}
@@ -1792,16 +1780,14 @@ const Discussions = () => {
 
                           {message.messageType == "application/pdf" && (
                             <div
-                              className={`${
-                                message.sender?._id == userId ? " " : ""
-                              } flex flex-col gap-[4px] `}
+                              className={`${message.sender?._id == userId ? " " : ""
+                                } flex flex-col gap-[4px] `}
                             >
                               <div
-                                className={` w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${
-                                  message.sender?._id == userId
+                                className={` w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${message.sender?._id == userId
                                     ? "bg-[#EDF3FB] "
                                     : "bg-[#F2F3F5]"
-                                } `}
+                                  } `}
                               >
                                 <a href={message.link}>
                                   <DownloadIcon />
@@ -1826,16 +1812,14 @@ const Discussions = () => {
                           {message?.messageType == "application/msword" &&
                             message.link != null && (
                               <div
-                                className={`${
-                                  message.sender?._id == userId ? " " : ""
-                                } flex flex-col gap-[4px] `}
+                                className={`${message.sender?._id == userId ? " " : ""
+                                  } flex flex-col gap-[4px] `}
                               >
                                 <div
-                                  className={` w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${
-                                    message.sender?._id == userId
+                                  className={` w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${message.sender?._id == userId
                                       ? "bg-[#EDF3FB] "
                                       : "bg-[#F2F3F5]"
-                                  } `}
+                                    } `}
                                 >
                                   <a href={message.link}>
                                     <DownloadIcon />
@@ -1850,16 +1834,14 @@ const Discussions = () => {
                           {message?.messageType == "application/vnd.ms-excel" &&
                             message.link != null && (
                               <div
-                                className={`${
-                                  message.sender?._id == userId ? " " : ""
-                                } flex flex-col gap-[4px] `}
+                                className={`${message.sender?._id == userId ? " " : ""
+                                  } flex flex-col gap-[4px] `}
                               >
                                 <div
-                                  className={` w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${
-                                    message.sender?._id == userId
+                                  className={` w-[240px] h-[120px] flex items-center justify-center rounded-[8px] ${message.sender?._id == userId
                                       ? "bg-[#EDF3FB] "
                                       : "bg-[#F2F3F5]"
-                                  } `}
+                                    } `}
                                 >
                                   <a href={message.link}>
                                     <DownloadIcon />
@@ -1887,7 +1869,7 @@ const Discussions = () => {
                             <ReadIcon
                               iconColor={
                                 message?.isReadByAll.length ===
-                                groupChatRoom.users.length
+                                  groupChatRoom.users.length
                                   ? "#1600D0"
                                   : "#57585C"
                               }
@@ -2248,7 +2230,7 @@ const Discussions = () => {
                                 <p>{group?.users[1]?.username}</p>
                                 <p>
                                   {draftMessages &&
-                                  draftMessages[group?._id] ? (
+                                    draftMessages[group?._id] ? (
                                     <p>
                                       Draft:{" "}
                                       {draftMessages[group?._id]?.draftMessage}
@@ -2281,12 +2263,11 @@ const Discussions = () => {
                                 <p>{group?.groupChatRoom?.chatName}</p>
                                 <p>
                                   {draftMessages[group.groupChatRoom._id]
-                                    ? `Draft: ${
-                                        draftMessages[group.groupChatRoom._id]
-                                          ?.draftMessage
-                                      }`
+                                    ? `Draft: ${draftMessages[group.groupChatRoom._id]
+                                      ?.draftMessage
+                                    }`
                                     : group.groupChatRoom.latestMessage
-                                        ?.content}
+                                      ?.content}
                                 </p>
                               </div>
                             </p>
